@@ -7,7 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_: FastAPI) -> AsyncGenerator:
     yield
 
 
@@ -24,13 +24,13 @@ def make_app() -> FastAPI:
     )
 
     @app.get("/")
-    async def root():  # type: ignore
+    async def root() -> str:
         return "The API is running!"
 
     return app
 
 
-def main():
+def main() -> None:
     app = make_app()
     uvicorn.run(app, port=8000)
 
