@@ -12,7 +12,7 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-alpine
+FROM python:3.13-alpine AS final
 
 COPY --from=builder --chown=app:app /app /app
 
