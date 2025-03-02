@@ -21,7 +21,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Set up Python
-        run: uv setup python
+        run: uv python install
 
       - name: Run Ruff
         run: |
@@ -40,7 +40,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Set up Python
-        run: uv setup python
+        run: uv python install
 
       - name: Run MyPy
         run: |
