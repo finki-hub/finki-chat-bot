@@ -12,7 +12,6 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-
   db:
     image: pgvector/pgvector:pg17
     environment:
@@ -30,7 +29,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
   pgadmin:
     image: dpage/pgadmin4:latest
     ports:
