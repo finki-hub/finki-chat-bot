@@ -10,26 +10,7 @@ on:
 
 jobs:
   ruff:
-    name: Ruff
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Set up Python
-        run: uv python install
-
-      - name: Run Ruff
-        run: |
-          cd api
-          uvx ruff check .
-
-  mypy:
-    name: MyPy
+    name: Ruff & MyPy
     runs-on: ubuntu-latest
 
     steps:
@@ -46,6 +27,11 @@ jobs:
         run: |
           cd api
           uv sync
+
+      - name: Run Ruff
+        run: |
+          cd api
+          uvx ruff check .
 
       - name: Run MyPy
         run: |
