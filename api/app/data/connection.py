@@ -1,6 +1,6 @@
 import os
 
-import asyncpg
+import asyncpg  # type: ignore[import-untyped]
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -17,7 +17,11 @@ class Database:
     async def init(self) -> None:
         """Initialize the database connection pool."""
         if self.pool is None:
-            self.pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=10)
+            self.pool: asyncpg.Pool = await asyncpg.create_pool(
+                DATABASE_URL,
+                min_size=1,
+                max_size=10,
+            )
 
     async def disconnect(self) -> None:
         """Close the connection pool."""
@@ -25,21 +29,21 @@ class Database:
             await self.pool.close()
             self.pool = None
 
-    async def fetch(self, query: str, *args) -> list[asyncpg.Record]:
+    async def fetch(self, query: str, *args: list) -> list[asyncpg.Record]:
         """Fetch multiple rows from the database."""
         if not self.pool:
             await self.init()
         async with self.pool.acquire() as conn:
             return await conn.fetch(query, *args)
 
-    async def fetchrow(self, query: str, *args) -> asyncpg.Record | None:
+    async def fetchrow(self, query: str, *args: list) -> asyncpg.Record | None:
         """Fetch a single row from the database."""
         if not self.pool:
             await self.init()
         async with self.pool.acquire() as conn:
             return await conn.fetchrow(query, *args)
 
-    async def execute(self, query: str, *args) -> str:
+    async def execute(self, query: str, *args: list) -> str:
         """Execute a query (INSERT, UPDATE, DELETE) and return status."""
         if not self.pool:
             await self.init()

@@ -54,7 +54,7 @@ def make_app() -> FastAPI:
 
 def main() -> None:
     app = make_app()
-    uvicorn.run(app, port=8880, host="0.0.0.0")
+    uvicorn.run(app, port=8880, host="0.0.0.0")  # noqa: S104
 
 
 if __name__ == "__main__":

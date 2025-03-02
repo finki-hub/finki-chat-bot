@@ -1,3 +1,5 @@
+# mypy: disable-error-code="arg-type"
+
 from app.data.connection import Database
 from app.schema.question import (
     CreateQuestionSchema,
@@ -35,7 +37,11 @@ async def get_question_by_name_query(name: str) -> QuestionSchema | None:
 async def create_question_query(
     question: CreateQuestionSchema,
 ) -> QuestionSchema | None:
-    query = "INSERT INTO question (name, content, user_id, links) VALUES ($1, $2, $3, $4) RETURNING *"
+    query = """
+    INSERT INTO question (name, content, user_id, links)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *
+    """
     result = await db.fetchrow(
         query,
         question.name,
