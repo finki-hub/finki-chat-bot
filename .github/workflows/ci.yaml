@@ -42,6 +42,11 @@ jobs:
       - name: Set up Python
         run: uv python install
 
+      - name: Install Dependencies
+        run: |
+          cd api
+          uv sync
+
       - name: Run MyPy
         run: |
           cd api
