@@ -43,6 +43,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     networks:
       - finki_stack
+    user: "0:0"
     restart: unless-stopped
 
 networks:

@@ -46,6 +46,7 @@ services:
       - finki_stack_dev
     volumes:
       - ./pgadmin:/var/lib/pgadmin
+    user: "0:0"
     restart: unless-stopped
 
 networks:
