@@ -8,8 +8,8 @@ class LinkSchema(BaseModel):
     id: UUID
     name: str
     url: str
-    description: str | None
-    user_id: str
+    description: str | None = Field(default=None)
+    user_id: str | None = Field(default=None)
     created_at: datetime
     updated_at: datetime
 

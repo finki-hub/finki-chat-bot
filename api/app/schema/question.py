@@ -8,8 +8,8 @@ class QuestionSchema(BaseModel):
     id: UUID
     name: str
     content: str
-    user_id: str
-    links: dict[str, str] | None
+    user_id: str | None = Field(default=None)
+    links: dict[str, str] | None = Field(default=None)
     created_at: datetime
     updated_at: datetime
 
