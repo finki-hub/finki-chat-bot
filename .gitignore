@@ -1,5 +1,10 @@
 # PostgreSQL
 pgdata/
+pgadmin/
 
 # Environment
 .env
+
+# Scripts
+scripts/*.json
+scripts/*.sql
