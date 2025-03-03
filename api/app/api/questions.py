@@ -1,3 +1,5 @@
+import urllib
+
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -38,9 +40,11 @@ async def get_question_names() -> list[str]:
     return result
 
 
-@router.get("/name/{name}", response_model=QuestionSchema)
+@router.get("/name/{name:path}", response_model=QuestionSchema)
 async def get_question_by_name(name: str) -> QuestionSchema:
-    result = await get_question_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+
+    result = await get_question_by_name_query(decoded_name)
 
     if not result:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -65,7 +69,8 @@ async def create_question(question: CreateQuestionSchema) -> QuestionSchema:
 
 @router.put("/update/{name}", response_model=QuestionSchema)
 async def update_question(name: str, question: UpdateQuestionSchema) -> QuestionSchema:
-    existing_question = await get_question_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+    existing_question = await get_question_by_name_query(decoded_name)
 
     if not existing_question:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -75,7 +80,7 @@ async def update_question(name: str, question: UpdateQuestionSchema) -> Question
     if len(updates) == 0:
         raise HTTPException(status_code=400, detail="No updates provided")
 
-    result = await update_question_query(name, question)
+    result = await update_question_query(decoded_name, question)
 
     if not result:
         raise HTTPException(status_code=400, detail="Failed to update question")
@@ -85,12 +90,13 @@ async def update_question(name: str, question: UpdateQuestionSchema) -> Question
 
 @router.delete("/delete/{name}", response_model=QuestionSchema)
 async def delete_question(name: str) -> QuestionSchema:
-    existing_question = await get_question_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+    existing_question = await get_question_by_name_query(decoded_name)
 
     if not existing_question:
         raise HTTPException(status_code=404, detail="Question not found")
 
-    await delete_question_query(name)
+    await delete_question_query(decoded_name)
 
     return existing_question
 
