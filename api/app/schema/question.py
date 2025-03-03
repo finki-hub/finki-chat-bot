@@ -17,7 +17,7 @@ class QuestionSchema(BaseModel):
 class CreateQuestionSchema(BaseModel):
     name: str
     content: str
-    user_id: str
+    user_id: str | None = Field(default=None)
     links: dict[str, str] | None = Field(default=None)
 
 
