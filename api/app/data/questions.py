@@ -1,5 +1,7 @@
 # mypy: disable-error-code="arg-type"
 
+import json
+
 from app.data.connection import Database
 from app.schema.question import (
     CreateQuestionSchema,
@@ -14,7 +16,18 @@ async def get_questions_query() -> list[QuestionSchema]:
     query = "SELECT * FROM question ORDER BY name ASC"
     result = await db.fetch(query)
 
-    return [QuestionSchema(**row) for row in result]
+    return [
+        QuestionSchema(
+            id=row["id"],
+            name=row["name"],
+            content=row["content"],
+            user_id=row["user_id"],
+            links=json.loads(row["links"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+        for row in result
+    ]
 
 
 async def get_question_names_query() -> list[str]:
@@ -31,7 +44,15 @@ async def get_question_by_name_query(name: str) -> QuestionSchema | None:
     if not result:
         return None
 
-    return QuestionSchema(**result)
+    return QuestionSchema(
+        id=result["id"],
+        name=result["name"],
+        content=result["content"],
+        user_id=result["user_id"],
+        links=json.loads(result["links"]),
+        created_at=result["created_at"],
+        updated_at=result["updated_at"],
+    )
 
 
 async def create_question_query(
@@ -53,7 +74,15 @@ async def create_question_query(
     if not result:
         return None
 
-    return QuestionSchema(**result)
+    return QuestionSchema(
+        id=result["id"],
+        name=result["name"],
+        content=result["content"],
+        user_id=result["user_id"],
+        links=json.loads(result["links"]),
+        created_at=result["created_at"],
+        updated_at=result["updated_at"],
+    )
 
 
 async def update_question_query(
@@ -75,7 +104,15 @@ async def update_question_query(
     if not result:
         return None
 
-    return QuestionSchema(**result)
+    return QuestionSchema(
+        id=result["id"],
+        name=result["name"],
+        content=result["content"],
+        user_id=result["user_id"],
+        links=json.loads(result["links"]),
+        created_at=result["created_at"],
+        updated_at=result["updated_at"],
+    )
 
 
 async def delete_question_query(name: str) -> None:
@@ -90,4 +127,12 @@ async def get_nth_question_query(n: int) -> QuestionSchema | None:
     if result is None:
         return None
 
-    return QuestionSchema(**result)
+    return QuestionSchema(
+        id=result["id"],
+        name=result["name"],
+        content=result["content"],
+        user_id=result["user_id"],
+        links=json.loads(result["links"]),
+        created_at=result["created_at"],
+        updated_at=result["updated_at"],
+    )
