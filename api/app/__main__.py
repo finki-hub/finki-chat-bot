@@ -6,6 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from app.api.links import router as links_router
 from app.api.questions import router as questions_router
 from app.constants import strings
 from app.data.connection import Database
@@ -44,6 +45,7 @@ def make_app() -> FastAPI:
     )
 
     app.include_router(questions_router, prefix="/questions")
+    app.include_router(links_router, prefix="/links")
 
     @app.get("/", tags=["Root"])
     async def root() -> str:
