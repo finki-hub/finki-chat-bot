@@ -11,7 +11,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - finki_stack
     restart: unless-stopped
+
   db:
     image: pgvector/pgvector:pg17
     environment:
@@ -28,7 +31,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - finki_stack
     restart: unless-stopped
+
   pgadmin:
     image: dpage/pgadmin4:latest
     ports:
@@ -36,4 +42,11 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    networks:
+      - finki_stack
     restart: unless-stopped
+
+networks:
+  finki_stack:
+    name: finki_stack
+    driver: bridge
