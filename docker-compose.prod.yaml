@@ -1,4 +1,5 @@
 name: finki-chat-bot
+
 services:
   api:
     image: ghcr.io/delemangi/finki-chat-bot:latest
