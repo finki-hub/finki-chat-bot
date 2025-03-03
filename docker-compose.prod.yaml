@@ -1,10 +1,7 @@
-name: finki-chat-bot-dev
-
+name: finki-chat-bot
 services:
   api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
+    image: ghcr.io/delemangi/finki-chat-bot:latest
     ports:
       - '8880:8880'
     environment:
@@ -13,7 +10,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - finki_stack_dev
+      - finki_stack
     restart: unless-stopped
 
   db:
@@ -33,21 +30,21 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - finki_stack_dev
+      - finki_stack
     restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4:latest
     ports:
-      - '5550:80'
+      - '5555:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     networks:
-      - finki_stack_dev
+      - finki_stack
     restart: unless-stopped
 
 networks:
-  finki_stack_dev:
-    name: finki_stack_dev
+  finki_stack:
+    name: finki_stack
     driver: bridge
