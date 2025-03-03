@@ -9,7 +9,7 @@ on:
       - 'main'
 
 jobs:
-  ruff:
+  ruff-mypy:
     name: Ruff & MyPy
     runs-on: ubuntu-latest
 
