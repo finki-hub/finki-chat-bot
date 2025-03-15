@@ -96,7 +96,7 @@ async def update_question_query(
     update_values = []
     for i, (key, value) in enumerate(updates.items()):
         if key == "links":
-            value = json.dumps(value)
+            value = json.dumps(value)  # noqa: PLW2901
             query += f"{key} = ${i + 1}::jsonb, "
         else:
             query += f"{key} = ${i + 1}, "
