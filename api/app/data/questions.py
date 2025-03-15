@@ -60,7 +60,7 @@ async def create_question_query(
 ) -> QuestionSchema | None:
     query = """
     INSERT INTO question (name, content, user_id, links)
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1, $2, $3, $4::jsonb)
     RETURNING *
     """
     result = await db.fetchrow(
@@ -68,7 +68,7 @@ async def create_question_query(
         question.name,
         question.content,
         question.user_id,
-        question.links,
+        json.dumps(question.links),
     )
 
     if not result:
@@ -93,13 +93,19 @@ async def update_question_query(
 
     query = "UPDATE question SET "
 
-    for i, key in enumerate(updates.keys()):
-        query += f"{key} = ${i + 1}, "
+    update_values = []
+    for i, (key, value) in enumerate(updates.items()):
+        if key == "links":
+            value = json.dumps(value)
+            query += f"{key} = ${i + 1}::jsonb, "
+        else:
+            query += f"{key} = ${i + 1}, "
+        update_values.append(value)
 
     query += "updated_at = NOW()"
-    query += f" WHERE name = ${i + 1} RETURNING *"
+    query += f" WHERE name = ${len(updates) + 1} RETURNING *"
 
-    result = await db.fetchrow(query, *updates.values(), name)
+    result = await db.fetchrow(query, *update_values, name)
 
     if not result:
         return None
