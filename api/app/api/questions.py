@@ -67,7 +67,7 @@ async def create_question(question: CreateQuestionSchema) -> QuestionSchema:
     return result
 
 
-@router.put("/update/{name}", response_model=QuestionSchema)
+@router.put("/update/{name:path}", response_model=QuestionSchema)
 async def update_question(name: str, question: UpdateQuestionSchema) -> QuestionSchema:
     decoded_name = urllib.parse.unquote(name)
     existing_question = await get_question_by_name_query(decoded_name)
@@ -88,7 +88,7 @@ async def update_question(name: str, question: UpdateQuestionSchema) -> Question
     return result
 
 
-@router.delete("/delete/{name}", response_model=QuestionSchema)
+@router.delete("/delete/{name:path}", response_model=QuestionSchema)
 async def delete_question(name: str) -> QuestionSchema:
     decoded_name = urllib.parse.unquote(name)
     existing_question = await get_question_by_name_query(decoded_name)

@@ -1,3 +1,5 @@
+import urllib
+
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -34,9 +36,11 @@ async def get_link_names() -> list[str]:
     return result
 
 
-@router.get("/name/{name}", response_model=LinkSchema)
+@router.get("/name/{name:path}", response_model=LinkSchema)
 async def get_link_by_name(name: str) -> LinkSchema:
-    result = await get_link_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+
+    result = await get_link_by_name_query(decoded_name)
 
     if not result:
         raise HTTPException(status_code=404, detail="Link not found")
@@ -59,9 +63,10 @@ async def create_link(link: CreateLinkSchema) -> LinkSchema:
     return result
 
 
-@router.put("/update/{name}", response_model=LinkSchema)
+@router.put("/update/{name:path}", response_model=LinkSchema)
 async def update_link(name: str, link: UpdateLinkSchema) -> LinkSchema:
-    existing_link = await get_link_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+    existing_link = await get_link_by_name_query(decoded_name)
 
     if not existing_link:
         raise HTTPException(status_code=404, detail="Link not found")
@@ -71,7 +76,7 @@ async def update_link(name: str, link: UpdateLinkSchema) -> LinkSchema:
     if len(updates) == 0:
         raise HTTPException(status_code=400, detail="No updates provided")
 
-    result = await update_link_query(name, link)
+    result = await update_link_query(decoded_name, link)
 
     if not result:
         raise HTTPException(status_code=400, detail="Failed to update link")
@@ -79,14 +84,15 @@ async def update_link(name: str, link: UpdateLinkSchema) -> LinkSchema:
     return result
 
 
-@router.delete("/delete/{name}", response_model=LinkSchema)
+@router.delete("/delete/{name:path}", response_model=LinkSchema)
 async def delete_link(name: str) -> LinkSchema:
-    existing_link = await get_link_by_name_query(name)
+    decoded_name = urllib.parse.unquote(name)
+    existing_link = await get_link_by_name_query(decoded_name)
 
     if not existing_link:
         raise HTTPException(status_code=404, detail="Link not found")
 
-    await delete_link_query(name)
+    await delete_link_query(decoded_name)
 
     return existing_link
 
