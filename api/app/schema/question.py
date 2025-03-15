@@ -1,15 +1,15 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class QuestionSchema(BaseModel):
     id: UUID
     name: str
     content: str
-    user_id: str | None = Field(default=None)
-    links: dict[str, str] | None = Field(default=None)
+    user_id: str | None = None
+    links: dict[str, str] | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -17,12 +17,12 @@ class QuestionSchema(BaseModel):
 class CreateQuestionSchema(BaseModel):
     name: str
     content: str
-    user_id: str | None = Field(default=None)
-    links: dict[str, str] | None = Field(default=None)
+    user_id: str | None = None
+    links: dict[str, str] | None = None
 
 
 class UpdateQuestionSchema(BaseModel):
-    name: str | None = Field(default=None)
-    content: str | None = Field(default=None)
-    user_id: str | None = Field(default=None)
-    links: dict[str, str] | None = Field(default=None)
+    name: str | None = None
+    content: str | None = None
+    user_id: str | None = None
+    links: dict[str, str] | None = None
