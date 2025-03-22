@@ -1,9 +1,10 @@
-name: CI/CD Workflow
+name: Docker
 
 on:
   push:
     branches:
       - 'main'
+      - 'dev'
 
 jobs:
   docker:
@@ -31,7 +32,7 @@ jobs:
       - name: Build and Push to GHCR
         uses: docker/build-push-action@v5
         with:
-          context: '{{defaultContext}}:api'
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/delemangi/finki-chat-bot:latest
+          tags: |
+            ghcr.io/delemangi/finki-chat-bot:${{ github.ref == 'refs/heads/main' && 'latest' || 'dev' }}
