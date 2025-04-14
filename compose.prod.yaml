@@ -2,7 +2,7 @@ name: finki-chat-bot
 
 services:
   api:
-    image: ghcr.io/delemangi/finki-chat-bot:latest
+    image: ghcr.io/finki-hub/finki-chat-bot:latest
     ports:
       - '8880:8880'
     environment:
