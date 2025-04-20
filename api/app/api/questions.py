@@ -1,5 +1,6 @@
 import urllib
 
+from api.app.constants import QUESTION_404
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -47,7 +48,7 @@ async def get_question_by_name(name: str) -> QuestionSchema:
     result = await get_question_by_name_query(decoded_name)
 
     if not result:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail=QUESTION_404)
 
     return result
 
@@ -73,7 +74,7 @@ async def update_question(name: str, question: UpdateQuestionSchema) -> Question
     existing_question = await get_question_by_name_query(decoded_name)
 
     if not existing_question:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail=QUESTION_404)
 
     updates = question.model_dump(exclude_unset=True)
 
@@ -94,7 +95,7 @@ async def delete_question(name: str) -> QuestionSchema:
     existing_question = await get_question_by_name_query(decoded_name)
 
     if not existing_question:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail=QUESTION_404)
 
     await delete_question_query(decoded_name)
 
@@ -106,6 +107,6 @@ async def get_nth_question(n: int) -> QuestionSchema:
     result = await get_nth_question_query(n)
 
     if not result:
-        raise HTTPException(status_code=404, detail="Question not found")
+        raise HTTPException(status_code=404, detail=QUESTION_404)
 
     return result

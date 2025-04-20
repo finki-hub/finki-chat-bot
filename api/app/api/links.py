@@ -1,5 +1,6 @@
 import urllib
 
+from api.app.constants import LINK_404
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -43,7 +44,7 @@ async def get_link_by_name(name: str) -> LinkSchema:
     result = await get_link_by_name_query(decoded_name)
 
     if not result:
-        raise HTTPException(status_code=404, detail="Link not found")
+        raise HTTPException(status_code=404, detail=LINK_404)
 
     return result
 
@@ -69,7 +70,7 @@ async def update_link(name: str, link: UpdateLinkSchema) -> LinkSchema:
     existing_link = await get_link_by_name_query(decoded_name)
 
     if not existing_link:
-        raise HTTPException(status_code=404, detail="Link not found")
+        raise HTTPException(status_code=404, detail=LINK_404)
 
     updates = link.model_dump(exclude_unset=True)
 
@@ -90,7 +91,7 @@ async def delete_link(name: str) -> LinkSchema:
     existing_link = await get_link_by_name_query(decoded_name)
 
     if not existing_link:
-        raise HTTPException(status_code=404, detail="Link not found")
+        raise HTTPException(status_code=404, detail=LINK_404)
 
     await delete_link_query(decoded_name)
 
@@ -102,6 +103,6 @@ async def get_nth_link(n: int) -> LinkSchema:
     result = await get_nth_link_query(n)
 
     if not result:
-        raise HTTPException(status_code=404, detail="Link not found")
+        raise HTTPException(status_code=404, detail=LINK_404)
 
     return result
