@@ -1,6 +1,5 @@
 import urllib
 
-from api.app.constants import QUESTION_404
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -18,6 +17,8 @@ from app.schema.question import (
     QuestionSchema,
     UpdateQuestionSchema,
 )
+
+from .constants import QUESTION_404
 
 router = APIRouter(tags=["Questions"])
 

@@ -1,6 +1,5 @@
 import urllib
 
-from api.app.constants import LINK_404
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
@@ -14,6 +13,8 @@ from app.data.links import (
     update_link_query,
 )
 from app.schema.link import CreateLinkSchema, LinkSchema, UpdateLinkSchema
+
+from .constants import LINK_404
 
 router = APIRouter(tags=["Links"])
 
