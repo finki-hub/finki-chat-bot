@@ -25,3 +25,8 @@ CREATE TABLE IF NOT EXISTS link (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS link_name_idx ON link (name);
+
+-- Embeddings
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_llama3_3_70b vector (8192);

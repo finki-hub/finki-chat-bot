@@ -3,6 +3,7 @@ import urllib
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
+from app.constants.errors import QUESTION_404
 from app.data.questions import (
     create_question_query,
     delete_question_query,
@@ -18,14 +19,12 @@ from app.schema.question import (
     UpdateQuestionSchema,
 )
 
-from .constants import QUESTION_404
-
 router = APIRouter(tags=["Questions"])
 
 
 @router.get("/check", response_model=str)
 async def check() -> str:
-    return strings.alive_response
+    return strings.ALIVE_RESPONSE
 
 
 @router.get("/list", response_model=list[QuestionSchema])

@@ -1,1 +1,1 @@
-alive_response = "The API is running!"
+ALIVE_RESPONSE = "The API is running!"

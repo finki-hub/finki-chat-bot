@@ -1,6 +1,5 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
@@ -11,25 +10,16 @@ from app.api.questions import router as questions_router
 from app.constants import strings
 from app.data.connection import Database
 
-schema_path = Path.cwd() / "resources" / "schema.sql"
-
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator:
     db = Database()
 
-    await run_migration(db)
+    await db.run_migrations()
 
     yield
 
     await db.disconnect()
-
-
-async def run_migration(database: Database) -> None:
-    with Path.open(schema_path) as f:
-        sql = f.read()
-
-    await database.execute(sql)
 
 
 def make_app() -> FastAPI:
@@ -49,7 +39,7 @@ def make_app() -> FastAPI:
 
     @app.get("/", tags=["Root"])
     async def root() -> str:
-        return strings.alive_response
+        return strings.ALIVE_RESPONSE
 
     return app
 

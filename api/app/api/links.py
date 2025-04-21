@@ -3,6 +3,7 @@ import urllib
 from fastapi import APIRouter, HTTPException
 
 from app.constants import strings
+from app.constants.errors import LINK_404
 from app.data.links import (
     create_link_query,
     delete_link_query,
@@ -14,14 +15,12 @@ from app.data.links import (
 )
 from app.schema.link import CreateLinkSchema, LinkSchema, UpdateLinkSchema
 
-from .constants import LINK_404
-
 router = APIRouter(tags=["Links"])
 
 
 @router.get("/check", response_model=str)
 async def check() -> str:
-    return strings.alive_response
+    return strings.ALIVE_RESPONSE
 
 
 @router.get("/list", response_model=list[LinkSchema])
