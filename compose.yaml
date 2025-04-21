@@ -8,7 +8,9 @@ services:
     ports:
       - '8880:8880'
     environment:
+      API_KEY: ${API_KEY}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      OLLAMA_URL: ${OLLAMA_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -46,7 +48,7 @@ services:
       - finki_stack_dev
     volumes:
       - ./pgadmin:/var/lib/pgadmin
-    user: "0:0"
+    user: '0:0'
     restart: unless-stopped
 
 networks:
