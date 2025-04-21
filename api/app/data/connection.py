@@ -9,7 +9,7 @@ from app.utils.config import DATABASE_URL
 class Database:
     _instance: "Database | None" = None
 
-    pool: Pool[Record] | None = None
+    pool: Pool | None = None
 
     def __new__(cls) -> "Database":
         if cls._instance is None:
@@ -40,7 +40,7 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetch(query, *args)
 
-    async def fetchrow(self, query: str, *args: list) -> Record | None:
+    async def fetchrow(self, query: str, *args: str) -> Record | None:
         """Fetch a single row from the database."""
         if not self.pool:
             await self.init()
@@ -48,7 +48,7 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetchrow(query, *args)
 
-    async def execute(self, query: str, *args: list) -> str:
+    async def execute(self, query: str, *args: str) -> str:
         """Execute a query (INSERT, UPDATE, DELETE) and return status."""
         if not self.pool:
             await self.init()
