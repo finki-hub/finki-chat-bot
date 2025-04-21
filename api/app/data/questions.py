@@ -8,6 +8,8 @@ from app.schema.question import (
     QuestionSchema,
     UpdateQuestionSchema,
 )
+from app.utils.db import embedding_to_pgvector
+from app.utils.models import MODEL_COLUMNS, Model
 
 db = Database()
 
@@ -142,3 +144,25 @@ async def get_nth_question_query(n: int) -> QuestionSchema | None:
         created_at=result["created_at"],
         updated_at=result["updated_at"],
     )
+
+
+async def get_closest_questions(
+    embedded_query: list[float],
+    model: Model,
+    limit: int = 5,
+) -> list[QuestionSchema]:
+    sql = f"SELECT * FROM question ORDER BY {MODEL_COLUMNS[model]} <=> $1 LIMIT $2"  # noqa: S608
+    result = await db.fetch(sql, embedding_to_pgvector(embedded_query), limit)
+
+    return [
+        QuestionSchema(
+            id=row["id"],
+            name=row["name"],
+            content=row["content"],
+            user_id=row["user_id"],
+            links=json.loads(row["links"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+        for row in result
+    ]
