@@ -20,7 +20,7 @@ router = APIRouter(tags=["Links"])
 
 @router.get("/check", response_model=str)
 async def check() -> str:
-    return strings.ALIVE_RESPONSE
+    return strings.API_RUNNING
 
 
 @router.get("/list", response_model=list[LinkSchema])

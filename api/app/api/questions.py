@@ -1,6 +1,6 @@
 import urllib
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.constants import strings
 from app.constants.errors import QUESTION_404
@@ -13,18 +13,21 @@ from app.data.questions import (
     get_questions_query,
     update_question_query,
 )
+from app.llms.utils import fill_embeddings
+from app.schema.embedding import EmbeddingOptions
 from app.schema.question import (
     CreateQuestionSchema,
     QuestionSchema,
     UpdateQuestionSchema,
 )
+from app.utils.auth import verify_api_key
 
 router = APIRouter(tags=["Questions"])
 
 
 @router.get("/check", response_model=str)
 async def check() -> str:
-    return strings.ALIVE_RESPONSE
+    return strings.API_RUNNING
 
 
 @router.get("/list", response_model=list[QuestionSchema])
@@ -110,3 +113,13 @@ async def get_nth_question(n: int) -> QuestionSchema:
         raise HTTPException(status_code=404, detail=QUESTION_404)
 
     return result
+
+
+@router.post("/embed", response_model=str)
+async def embed_questions(
+    options: EmbeddingOptions,
+    _: None = Depends(verify_api_key),
+) -> str:
+    await fill_embeddings(options.model, options.all)
+
+    return strings.EMBEDDING_SUCCESS

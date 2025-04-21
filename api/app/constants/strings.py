@@ -1,1 +1,2 @@
-ALIVE_RESPONSE = "The API is running!"
+API_RUNNING = "The API is running!"
+EMBEDDING_SUCCESS = "Embeddings created successfully!"
