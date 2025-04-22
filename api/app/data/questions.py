@@ -149,10 +149,17 @@ async def get_nth_question_query(n: int) -> QuestionSchema | None:
 async def get_closest_questions(
     embedded_query: list[float],
     model: Model,
-    limit: int = 5,
+    limit: int = 8,
+    threshold: float = 0.5,
 ) -> list[QuestionSchema]:
-    sql = f"SELECT * FROM question ORDER BY {MODEL_COLUMNS[model]} <=> $1 LIMIT $2"  # noqa: S608
+    sql = f"SELECT *, {MODEL_COLUMNS[model]} <=> $1 AS distance FROM question ORDER BY distance LIMIT $2"  # noqa: E501, S608
     result = await db.fetch(sql, embedding_to_pgvector(embedded_query), limit)
+
+    filtered = [
+        row
+        for row in result
+        if row["distance"] is not None and row["distance"] < threshold
+    ]
 
     return [
         QuestionSchema(
@@ -164,5 +171,5 @@ async def get_closest_questions(
             created_at=row["created_at"],
             updated_at=row["updated_at"],
         )
-        for row in result
+        for row in filtered
     ]
