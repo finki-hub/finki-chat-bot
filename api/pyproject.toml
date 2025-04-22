@@ -57,4 +57,4 @@ select = [
     "LOG",
     "RUF",
 ]
-ignore = ["PLR2004", "PLR0912", "PLR0915", "TRY003", "PLR0911", "RET504"]
+ignore = ["PLR2004", "PLR0912", "PLR0915", "TRY003", "PLR0911", "RET504", "RUF001"]
