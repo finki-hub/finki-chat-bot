@@ -1,17 +1,24 @@
+from api.app.llms.models import Model
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
 
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
 from app.llms.prompts import build_context, build_prompt
 from app.llms.responses import generate_response
-from app.schema.chat import ChatQuestion
 
 router = APIRouter(tags=["Chat"])
 
 
+class ChatRequestSchema(BaseModel):
+    question: str
+    embeddings_model: Model = Field(default=Model.BGE_M3)
+    inference_model: Model = Field(default=Model.MISTRAL)
+
+
 @router.post("/")
-async def chat(options: ChatQuestion) -> StreamingResponse:
+async def chat(options: ChatRequestSchema) -> StreamingResponse:
     question_embedding = await generate_embeddings(
         options.question,
         options.embeddings_model,
