@@ -8,7 +8,7 @@ from app.schema.question import (
     QuestionSchema,
     UpdateQuestionSchema,
 )
-from app.utils.db import embedding_to_pgvector
+from app.utils.database import embedding_to_pgvector
 from app.utils.models import MODEL_COLUMNS, Model
 
 db = Database()

@@ -2,7 +2,7 @@ from app.data.connection import Database
 from app.llms.ollama import generate_ollama_embeddings
 from app.llms.prompts import SYSTEM_PROMPT
 from app.schema.question import QuestionSchema
-from app.utils.db import embedding_to_pgvector
+from app.utils.database import embedding_to_pgvector
 from app.utils.models import MODEL_COLUMNS, Model
 
 
