@@ -32,4 +32,4 @@ async def chat(options: ChatRequestSchema) -> StreamingResponse:
     context = build_context(questions)
     prompt = build_prompt(context, options.question)
 
-    return await generate_response(prompt, options.embeddings_model)
+    return await generate_response(prompt, options.inference_model)

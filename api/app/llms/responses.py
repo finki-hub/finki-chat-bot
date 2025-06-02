@@ -9,7 +9,7 @@ async def generate_response(
     model: Model,
 ) -> StreamingResponse:
     match model:
-        case Model.LLAMA_3_3_70B | Model.MISTRAL | Model.BGE_M3:
+        case Model.LLAMA_3_3_70B | Model.MISTRAL:
             return await stream_ollama_response(prompt, model)
         case _:
             raise ValueError(f"Unsupported model: {model}")
