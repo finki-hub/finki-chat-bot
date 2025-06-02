@@ -1,5 +1,5 @@
 from app.data.connection import Database
-from app.llms.models import MODEL_COLUMNS, Model
+from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.llms.ollama import generate_ollama_embeddings
 from app.utils.database import embedding_to_pgvector
 
@@ -15,7 +15,7 @@ async def generate_embeddings(text: str, model: Model) -> list[float]:
 async def fill_embeddings(model: Model, all: bool = False) -> None:
     db = Database()
 
-    model_column = MODEL_COLUMNS[model]
+    model_column = MODEL_EMBEDDINGS_COLUMNS[model]
     rows = (
         await db.fetch(
             f"SELECT id, name, content FROM question WHERE {model_column} IS NULL",  # noqa: S608

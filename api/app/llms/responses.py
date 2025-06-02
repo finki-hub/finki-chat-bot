@@ -1,0 +1,15 @@
+from api.app.llms.ollama import stream_ollama_response
+from fastapi.responses import StreamingResponse
+
+from app.llms.models import Model
+
+
+async def generate_response(
+    prompt: str,
+    model: Model,
+) -> StreamingResponse:
+    match model:
+        case Model.LLAMA_3_3_70B | Model.MISTRAL | Model.BGE_M3:
+            return await stream_ollama_response(prompt, model)
+        case _:
+            raise ValueError(f"Unsupported model: {model}")

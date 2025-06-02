@@ -3,7 +3,7 @@
 import json
 
 from app.data.connection import Database
-from app.llms.models import MODEL_COLUMNS, Model
+from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.schema.question import (
     CreateQuestionSchema,
     QuestionSchema,
@@ -152,7 +152,7 @@ async def get_closest_questions(
     limit: int = 8,
     threshold: float = 0.5,
 ) -> list[QuestionSchema]:
-    sql = f"SELECT *, {MODEL_COLUMNS[model]} <=> $1 AS distance FROM question ORDER BY distance LIMIT $2"  # noqa: E501, S608
+    sql = f"SELECT *, {MODEL_EMBEDDINGS_COLUMNS[model]} <=> $1 AS distance FROM question ORDER BY distance LIMIT $2"  # noqa: E501, S608
     result = await db.fetch(sql, embedding_to_pgvector(embedded_query), limit)
 
     filtered = [

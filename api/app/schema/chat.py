@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.llms.models import Model
 
 
 class ChatQuestion(BaseModel):
     question: str
-    model: Model
+    embeddings_model: Model = Field(default=Model.BGE_M3)
+    inference_model: Model = Field(default=Model.MISTRAL)
