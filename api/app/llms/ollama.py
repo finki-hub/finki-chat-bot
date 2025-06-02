@@ -4,8 +4,8 @@ from collections.abc import AsyncGenerator, Generator
 from fastapi.responses import StreamingResponse
 from langchain_ollama import OllamaEmbeddings, OllamaLLM
 
+from app.llms.models import Model
 from app.utils.config import OLLAMA_URL
-from app.utils.models import Model
 
 
 async def generate_ollama_embeddings(text: str, model: Model) -> list[float]:

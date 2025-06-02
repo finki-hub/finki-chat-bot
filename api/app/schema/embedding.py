@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.utils.models import Model
+from app.llms.models import Model
 
 
 class EmbeddingOptions(BaseModel):

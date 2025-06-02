@@ -1,3 +1,5 @@
+from app.schema.question import QuestionSchema
+
 SYSTEM_PROMPT = (
     "Ти си љубезен асистент и експерт за сумаризации кој одговара на прашања поврзани со ФИНКИ. "  # noqa: E501
     "Секогаш одговарај на македонски јазик. Дај јасни, точни и концизни одговори на сите прашања "  # noqa: E501
@@ -6,3 +8,13 @@ SYSTEM_PROMPT = (
     "Ако не знаеш одговор или прашањето не е поврзано со ФИНКИ, кажи дека не си сигурен и препорачај "  # noqa: E501
     "корисникот да се обрати во Студентската служба на ФИНКИ."
 )
+
+
+def build_prompt(context: str, text: str) -> str:
+    return f"{SYSTEM_PROMPT}\n\nКонтекст:\n{context}\n\nПрашање: {text}\n\nОдговор:"
+
+
+def build_context(questions: list[QuestionSchema]) -> str:
+    return "\n".join(
+        [f"Наслов: {q.name}\nСодржина: {q.content}" for q in questions],
+    )

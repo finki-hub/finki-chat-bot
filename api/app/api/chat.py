@@ -2,8 +2,9 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from app.data.questions import get_closest_questions
+from app.llms.embeddings import generate_embeddings
 from app.llms.ollama import stream_ollama_response
-from app.llms.utils import build_context, build_prompt, generate_embeddings
+from app.llms.prompts import build_context, build_prompt
 from app.schema.chat import ChatQuestion
 
 router = APIRouter(tags=["Chat"])

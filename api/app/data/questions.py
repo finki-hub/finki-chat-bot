@@ -3,13 +3,13 @@
 import json
 
 from app.data.connection import Database
+from app.llms.models import MODEL_COLUMNS, Model
 from app.schema.question import (
     CreateQuestionSchema,
     QuestionSchema,
     UpdateQuestionSchema,
 )
 from app.utils.database import embedding_to_pgvector
-from app.utils.models import MODEL_COLUMNS, Model
 
 db = Database()
 

@@ -30,3 +30,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS link_name_idx ON link (name);
 
 ALTER TABLE question
 ADD COLUMN IF NOT EXISTS embedding_llama3_3_70b vector (8192);
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_bge_m3 vector (1024);

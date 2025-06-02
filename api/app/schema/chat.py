@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.utils.models import Model
+from app.llms.models import Model
 
 
 class ChatQuestion(BaseModel):

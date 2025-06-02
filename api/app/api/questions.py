@@ -13,7 +13,7 @@ from app.data.questions import (
     get_questions_query,
     update_question_query,
 )
-from app.llms.utils import fill_embeddings
+from app.llms.embeddings import fill_embeddings
 from app.schema.embedding import EmbeddingOptions
 from app.schema.question import (
     CreateQuestionSchema,
