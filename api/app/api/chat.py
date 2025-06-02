@@ -1,10 +1,10 @@
-from api.app.llms.models import Model
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
+from app.llms.models import Model
 from app.llms.prompts import build_context, build_prompt
 from app.llms.responses import generate_response
 
