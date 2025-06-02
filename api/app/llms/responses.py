@@ -1,7 +1,7 @@
-from api.app.llms.ollama import stream_ollama_response
 from fastapi.responses import StreamingResponse
 
 from app.llms.models import Model
+from app.llms.ollama import stream_ollama_response
 
 
 async def generate_response(
