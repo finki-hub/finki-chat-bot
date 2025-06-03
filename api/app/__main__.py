@@ -5,7 +5,6 @@ from datetime import UTC, datetime
 import uvicorn
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
@@ -56,7 +55,6 @@ def make_app(app_settings: Settings) -> FastAPI:
         allow_headers=["*"],
         expose_headers=app_settings.EXPOSE_HEADERS,
     )
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     db_dependency = Depends(get_db)
     common_dependencies = [db_dependency]
