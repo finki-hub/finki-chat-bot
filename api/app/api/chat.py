@@ -14,7 +14,7 @@ router = APIRouter(tags=["Chat"])
 class ChatRequestSchema(BaseModel):
     question: str
     embeddings_model: Model = Field(default=Model.BGE_M3)
-    inference_model: Model = Field(default=Model.MISTRAL)
+    inference_model: Model = Field(default=Model.LLAMA_3_3_70B)
 
 
 @router.post("/")
