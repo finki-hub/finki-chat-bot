@@ -49,7 +49,7 @@ async def list_link_names(db: Database = db_dep) -> list[str]:
 
 
 @router.get(
-    "/{name:path}",
+    "/name/{name:path}",
     summary="Fetch a link by name",
     description="Return the matching link, or 404 if not found.",
     response_model=LinkSchema,
