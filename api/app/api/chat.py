@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.constants.defaults import DEFAULT_EMBEDDINGS_MODEL, DEFAULT_INFERENCE_MODEL
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
@@ -13,8 +14,8 @@ router = APIRouter(tags=["Chat"])
 
 class ChatRequestSchema(BaseModel):
     question: str
-    embeddings_model: Model = Field(default=Model.BGE_M3)
-    inference_model: Model = Field(default=Model.LLAMA_3_3_70B)
+    embeddings_model: Model = Field(default=DEFAULT_EMBEDDINGS_MODEL)
+    inference_model: Model = Field(default=DEFAULT_INFERENCE_MODEL)
 
 
 @router.post("/")
@@ -26,7 +27,7 @@ async def chat(options: ChatRequestSchema) -> StreamingResponse:
     questions = await get_closest_questions(
         question_embedding,
         options.embeddings_model,
-        limit=12,
+        limit=20,
     )
 
     context = build_context(questions)

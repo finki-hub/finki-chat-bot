@@ -1,0 +1,4 @@
+from app.llms.models import Model
+
+DEFAULT_EMBEDDINGS_MODEL = Model.BGE_M3
+DEFAULT_INFERENCE_MODEL = Model.LLAMA_3_3_70B

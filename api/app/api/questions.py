@@ -1,19 +1,23 @@
 import urllib.parse
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from app.constants import strings
+from app.constants.defaults import DEFAULT_EMBEDDINGS_MODEL
 from app.constants.errors import QUESTION_404
 from app.data.questions import (
     create_question_query,
     delete_question_query,
+    get_closest_questions,
     get_nth_question_query,
     get_question_by_name_query,
     get_question_names_query,
     get_questions_query,
     update_question_query,
 )
-from app.llms.embeddings import fill_embeddings
+from app.llms.embeddings import fill_embeddings, generate_embeddings
+from app.llms.models import Model
 from app.schema.embedding import EmbeddingOptions
 from app.schema.question import (
     CreateQuestionSchema,
@@ -123,3 +127,25 @@ async def embed_questions(
     await fill_embeddings(options.model, options.all)
 
     return strings.EMBEDDING_SUCCESS
+
+
+class ClosestRequestSchema(BaseModel):
+    question: str
+    embeddings_model: Model = Field(default=DEFAULT_EMBEDDINGS_MODEL)
+
+
+@router.get("/closest")
+async def get_closest_questions_endpoint(
+    options: ClosestRequestSchema,
+) -> list[str]:
+    question_embedding = await generate_embeddings(
+        options.question,
+        options.embeddings_model,
+    )
+    questions = await get_closest_questions(
+        question_embedding,
+        options.embeddings_model,
+        limit=20,
+    )
+
+    return [q.name for q in questions]
