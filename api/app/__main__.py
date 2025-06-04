@@ -1,14 +1,14 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime
 
 import uvicorn
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.chat import router as chat_router
+from app.api.health import router as health_router
 from app.api.links import router as links_router
 from app.api.questions import router as questions_router
 from app.data.connection import Database
@@ -19,7 +19,9 @@ settings = Settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    """App startup/shutdown: init DB and run migrations."""
+    """
+    App startup/shutdown: init DB and run migrations.
+    """
     db = Database(dsn=settings.DATABASE_URL)
     app.state.db = db
 
@@ -31,11 +33,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     await db.disconnect()
 
 
-def get_db(request: Request) -> Database:
-    return request.app.state.db
-
-
 def make_app(settings: Settings) -> FastAPI:
+    """
+    Create and configure the FastAPI application.
+    """
     app = FastAPI(
         title=settings.APP_TITLE,
         description=settings.APP_DESCRIPTION,
@@ -59,71 +60,10 @@ def make_app(settings: Settings) -> FastAPI:
         expose_headers=settings.EXPOSE_HEADERS,
     )
 
-    db_dependency = Depends(get_db)
-    common_dependencies = [db_dependency]
-
-    app.include_router(
-        questions_router,
-        prefix="/questions",
-        tags=["Questions"],
-        dependencies=common_dependencies,
-    )
-    app.include_router(
-        links_router,
-        prefix="/links",
-        tags=["Links"],
-        dependencies=common_dependencies,
-    )
-    app.include_router(
-        chat_router,
-        prefix="/chat",
-        tags=["Chat"],
-        dependencies=common_dependencies,
-    )
-
-    @app.get("/", tags=["Health"], summary="API Status")
-    async def root() -> dict[str, str]:
-        return {"message": f"{settings.APP_TITLE} is running"}
-
-    @app.get(
-        "/health",
-        tags=["Health"],
-        summary="Application Health Check",
-        response_description="The health status of the application.",
-    )
-    async def health_check_endpoint(
-        db: Database = db_dependency,
-    ) -> JSONResponse:
-        db_status_message = "ok"
-        db_is_healthy = True
-        if not db.pool:
-            db_status_message = "database_pool_not_initialized"
-            db_is_healthy = False
-        else:
-            try:
-                result = await db.fetchval("SELECT 1")
-                if result != 1:
-                    db_status_message = "database_query_unexpected_result"
-                    db_is_healthy = False
-            except Exception:
-                db_status_message = "database_query_error"
-                db_is_healthy = False
-
-        app_overall_status = "ok" if db_is_healthy else "unhealthy"
-        http_status_code = (
-            status.HTTP_200_OK if db_is_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
-        )
-        response_content = {
-            "status": app_overall_status,
-            "timestamp": datetime.now(UTC).isoformat(),
-            "dependencies": {
-                "database": {
-                    "status": db_status_message,
-                    "healthy": db_is_healthy,
-                },
-            },
-        }
-        return JSONResponse(status_code=http_status_code, content=response_content)
+    app.include_router(health_router)
+    app.include_router(questions_router)
+    app.include_router(links_router)
+    app.include_router(chat_router)
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
@@ -149,6 +89,9 @@ def make_app(settings: Settings) -> FastAPI:
 
 
 def run_application() -> None:
+    """
+    Run the FastAPI application using Uvicorn.
+    """
     application = make_app(settings)
 
     uvicorn.run(

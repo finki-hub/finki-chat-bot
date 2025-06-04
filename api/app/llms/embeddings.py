@@ -12,9 +12,7 @@ async def generate_embeddings(text: str, model: Model) -> list[float]:
             raise ValueError(f"Unsupported model: {model}")
 
 
-async def fill_embeddings(model: Model, all: bool = False) -> None:
-    db = Database()
-
+async def fill_embeddings(db: Database, model: Model, all: bool = False) -> None:
     model_column = MODEL_EMBEDDINGS_COLUMNS[model]
     rows = (
         await db.fetch(

@@ -4,17 +4,15 @@ import json
 
 from app.data.connection import Database
 from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
-from app.schema.question import (
+from app.schemas.questions import (
     CreateQuestionSchema,
     QuestionSchema,
     UpdateQuestionSchema,
 )
 from app.utils.database import embedding_to_pgvector
 
-db = Database()
 
-
-async def get_questions_query() -> list[QuestionSchema]:
+async def get_questions_query(db: Database) -> list[QuestionSchema]:
     query = "SELECT * FROM question ORDER BY name ASC"
     result = await db.fetch(query)
 
@@ -32,14 +30,14 @@ async def get_questions_query() -> list[QuestionSchema]:
     ]
 
 
-async def get_question_names_query() -> list[str]:
+async def get_question_names_query(db: Database) -> list[str]:
     query = "SELECT name FROM question ORDER BY name ASC"
     result = await db.fetch(query)
 
     return [str(row["name"]) for row in result]
 
 
-async def get_question_by_name_query(name: str) -> QuestionSchema | None:
+async def get_question_by_name_query(db: Database, name: str) -> QuestionSchema | None:
     query = "SELECT * FROM question WHERE name = $1"
     result = await db.fetchrow(query, name)
 
@@ -58,6 +56,7 @@ async def get_question_by_name_query(name: str) -> QuestionSchema | None:
 
 
 async def create_question_query(
+    db: Database,
     question: CreateQuestionSchema,
 ) -> QuestionSchema | None:
     query = """
@@ -88,6 +87,7 @@ async def create_question_query(
 
 
 async def update_question_query(
+    db: Database,
     name: str,
     question: UpdateQuestionSchema,
 ) -> QuestionSchema | None:
@@ -123,12 +123,12 @@ async def update_question_query(
     )
 
 
-async def delete_question_query(name: str) -> None:
+async def delete_question_query(db: Database, name: str) -> None:
     query = "DELETE FROM question WHERE name = $1"
     await db.execute(query, name)
 
 
-async def get_nth_question_query(n: int) -> QuestionSchema | None:
+async def get_nth_question_query(db: Database, n: int) -> QuestionSchema | None:
     query = "SELECT * FROM question OFFSET $1 LIMIT 1 ORDER BY name ASC"
     result = await db.fetchrow(query, n)
 
@@ -147,6 +147,7 @@ async def get_nth_question_query(n: int) -> QuestionSchema | None:
 
 
 async def get_closest_questions(
+    db: Database,
     embedded_query: list[float],
     model: Model,
     limit: int = 8,

@@ -5,20 +5,22 @@ from fastapi.responses import StreamingResponse
 from langchain_ollama import OllamaEmbeddings, OllamaLLM
 
 from app.llms.models import Model
-from app.utils.config import OLLAMA_URL
+from app.utils.settings import Settings
+
+settings = Settings()
 
 
 async def generate_ollama_embeddings(text: str, model: Model) -> list[float]:
     ollama_embeddings = OllamaEmbeddings(
         model=model.value,
-        base_url=OLLAMA_URL,
+        base_url=settings.OLLAMA_URL,
     )
 
     return await asyncio.to_thread(ollama_embeddings.embed_query, text)
 
 
 async def stream_ollama_response(prompt: str, model: Model) -> StreamingResponse:
-    ollama_llm = OllamaLLM(model=model.value, base_url=OLLAMA_URL)
+    ollama_llm = OllamaLLM(model=model.value, base_url=settings.OLLAMA_URL)
 
     def sync_token_gen() -> Generator[str]:
         yield from ollama_llm.stream(prompt)

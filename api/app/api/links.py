@@ -1,8 +1,9 @@
 import urllib.parse
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.constants.errors import LINK_404
+from app.data.connection import Database
+from app.data.db import get_db
 from app.data.links import (
     create_link_query,
     delete_link_query,
@@ -12,91 +13,168 @@ from app.data.links import (
     get_nth_link_query,
     update_link_query,
 )
-from app.schema.link import CreateLinkSchema, LinkSchema, UpdateLinkSchema
+from app.schemas.links import CreateLinkSchema, LinkSchema, UpdateLinkSchema
 
-router = APIRouter(tags=["Links"])
+db_dep = Depends(get_db)
 
-
-@router.get("/list", response_model=list[LinkSchema])
-async def get_links() -> list[LinkSchema]:
-    result = await get_links_query()
-
-    return result
-
-
-@router.get("/names", response_model=list[str])
-async def get_link_names() -> list[str]:
-    result = await get_link_names_query()
-
-    return result
+router = APIRouter(
+    prefix="/links",
+    tags=["Links"],
+    dependencies=[db_dep],
+)
 
 
-@router.get("/name/{name:path}", response_model=LinkSchema)
-async def get_link_by_name(name: str) -> LinkSchema:
-    decoded_name = urllib.parse.unquote(name)
-
-    result = await get_link_by_name_query(decoded_name)
-
-    if not result:
-        raise HTTPException(status_code=404, detail=LINK_404)
-
-    return result
-
-
-@router.post("/create", response_model=LinkSchema)
-async def create_link(link: CreateLinkSchema) -> LinkSchema:
-    existing_link = await get_link_by_name_query(link.name)
-
-    if existing_link:
-        raise HTTPException(status_code=400, detail="Link already exists")
-
-    result = await create_link_query(link)
-
-    if not result:
-        raise HTTPException(status_code=400, detail="Failed to create link")
-
-    return result
+@router.get(
+    "/",
+    summary="List all links",
+    description="Return a list of all stored links.",
+    response_model=list[LinkSchema],
+    status_code=status.HTTP_200_OK,
+    operation_id="listLinks",
+)
+async def list_links(db: Database = db_dep) -> list[LinkSchema]:
+    return await get_links_query(db)
 
 
-@router.put("/update/{name:path}", response_model=LinkSchema)
-async def update_link(name: str, link: UpdateLinkSchema) -> LinkSchema:
-    decoded_name = urllib.parse.unquote(name)
-    existing_link = await get_link_by_name_query(decoded_name)
-
-    if not existing_link:
-        raise HTTPException(status_code=404, detail=LINK_404)
-
-    updates = link.model_dump(exclude_unset=True)
-
-    if len(updates) == 0:
-        raise HTTPException(status_code=400, detail="No updates provided")
-
-    result = await update_link_query(decoded_name, link)
-
-    if not result:
-        raise HTTPException(status_code=400, detail="Failed to update link")
-
-    return result
+@router.get(
+    "/names",
+    summary="List link names",
+    description="Return only the names (keys) of all stored links.",
+    response_model=list[str],
+    status_code=status.HTTP_200_OK,
+    operation_id="listLinkNames",
+)
+async def list_link_names(db: Database = db_dep) -> list[str]:
+    return await get_link_names_query(db)
 
 
-@router.delete("/delete/{name:path}", response_model=LinkSchema)
-async def delete_link(name: str) -> LinkSchema:
-    decoded_name = urllib.parse.unquote(name)
-    existing_link = await get_link_by_name_query(decoded_name)
+@router.get(
+    "/{name:path}",
+    summary="Fetch a link by name",
+    description="Return the matching link, or 404 if not found.",
+    response_model=LinkSchema,
+    status_code=status.HTTP_200_OK,
+    responses={404: {"description": "Link not found"}},
+    operation_id="getLinkByName",
+)
+async def get_link_by_name(name: str, db: Database = db_dep) -> LinkSchema:
+    decoded = urllib.parse.unquote(name)
+    link = await get_link_by_name_query(db, decoded)
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Link '{decoded}' not found",
+        )
+    return link
 
-    if not existing_link:
-        raise HTTPException(status_code=404, detail=LINK_404)
 
-    await delete_link_query(decoded_name)
+@router.post(
+    "/",
+    summary="Create a new link",
+    description="Create a link with a unique name. Returns 400 if name already exists.",
+    response_model=LinkSchema,
+    status_code=status.HTTP_201_CREATED,
+    responses={400: {"description": "Link already exists or creation failed"}},
+    operation_id="createLink",
+)
+async def create_link(
+    payload: CreateLinkSchema,
+    db: Database = db_dep,
+) -> LinkSchema:
+    if await get_link_by_name_query(db, payload.name):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Link '{payload.name}' already exists",
+        )
+    created = await create_link_query(db, payload)
+    if not created:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to create link",
+        )
+    return created
 
-    return existing_link
+
+@router.put(
+    "/{name:path}",
+    summary="Update an existing link",
+    description="Apply partial updates, or 404 if missing.",
+    response_model=LinkSchema,
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"description": "No updates provided or update failed"},
+        404: {"description": "Link not found"},
+    },
+    operation_id="updateLink",
+)
+async def update_link(
+    name: str,
+    payload: UpdateLinkSchema,
+    db: Database = db_dep,
+) -> LinkSchema:
+    decoded = urllib.parse.unquote(name)
+    existing = await get_link_by_name_query(db, decoded)
+    if not existing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Link '{decoded}' not found",
+        )
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No updates provided",
+        )
+    updated = await update_link_query(db, decoded, payload)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to update link",
+        )
+    return updated
 
 
-@router.get("/nth/{n}", response_model=LinkSchema)
-async def get_nth_link(n: int) -> LinkSchema:
-    result = await get_nth_link_query(n)
+@router.delete(
+    "/{name:path}",
+    summary="Delete a link",
+    description="Delete the link, and return the deleted record.",
+    response_model=LinkSchema,
+    status_code=status.HTTP_200_OK,
+    responses={404: {"description": "Link not found"}},
+    operation_id="deleteLink",
+)
+async def delete_link(
+    name: str,
+    db: Database = db_dep,
+) -> LinkSchema:
+    decoded = urllib.parse.unquote(name)
+    existing = await get_link_by_name_query(db, decoded)
+    if not existing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Link '{decoded}' not found",
+        )
+    await delete_link_query(db, decoded)
+    return existing
 
-    if not result:
-        raise HTTPException(status_code=404, detail=LINK_404)
 
-    return result
+@router.get(
+    "/nth/{n}",
+    summary="Get the Nth link",
+    description="Return the Nth link in insertion order (0-based), or 404 if out of range.",
+    response_model=LinkSchema,
+    status_code=status.HTTP_200_OK,
+    responses={404: {"description": "Index out of range"}},
+    operation_id="getNthLink",
+)
+async def get_nth_link(
+    n: int,
+    db: Database = db_dep,
+) -> LinkSchema:
+    link = await get_nth_link_query(db, n)
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No link at index {n}",
+        )
+    return link

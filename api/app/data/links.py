@@ -1,26 +1,24 @@
 # mypy: disable-error-code="arg-type"
 
 from app.data.connection import Database
-from app.schema.link import CreateLinkSchema, LinkSchema, UpdateLinkSchema
-
-db = Database()
+from app.schemas.links import CreateLinkSchema, LinkSchema, UpdateLinkSchema
 
 
-async def get_links_query() -> list[LinkSchema]:
+async def get_links_query(db: Database) -> list[LinkSchema]:
     query = "SELECT * FROM link ORDER BY name ASC"
     result = await db.fetch(query)
 
     return [LinkSchema(**row) for row in result]
 
 
-async def get_link_names_query() -> list[str]:
+async def get_link_names_query(db: Database) -> list[str]:
     query = "SELECT name FROM link ORDER BY name ASC"
     result = await db.fetch(query)
 
     return [str(row["name"]) for row in result]
 
 
-async def get_link_by_name_query(name: str) -> LinkSchema | None:
+async def get_link_by_name_query(db: Database, name: str) -> LinkSchema | None:
     query = "SELECT * FROM link WHERE name = $1"
     result = await db.fetchrow(query, name)
 
@@ -31,6 +29,7 @@ async def get_link_by_name_query(name: str) -> LinkSchema | None:
 
 
 async def create_link_query(
+    db: Database,
     link: CreateLinkSchema,
 ) -> LinkSchema | None:
     query = """
@@ -53,6 +52,7 @@ async def create_link_query(
 
 
 async def update_link_query(
+    db: Database,
     name: str,
     link: UpdateLinkSchema,
 ) -> LinkSchema | None:
@@ -77,12 +77,12 @@ async def update_link_query(
     return LinkSchema(**result)
 
 
-async def delete_link_query(name: str) -> None:
+async def delete_link_query(db: Database, name: str) -> None:
     query = "DELETE FROM link WHERE name = $1"
     await db.execute(query, name)
 
 
-async def get_nth_link_query(n: int) -> LinkSchema | None:
+async def get_nth_link_query(db: Database, n: int) -> LinkSchema | None:
     query = "SELECT * FROM link ORDER BY name ASC LIMIT 1 OFFSET $1"
     result = await db.fetchrow(query, n)
 
