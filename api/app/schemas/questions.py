@@ -102,7 +102,7 @@ class EmbedQuestionsSchema(BaseModel):
 
 
 class GetClosestQuestionsSchema(BaseModel):
-    question: str = Field(
+    prompt: str = Field(
         examples=["What is the capital of France?"],
         description="Query string to embed and search",
     )

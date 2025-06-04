@@ -73,10 +73,10 @@ async def closest_questions(
     params: GetClosestQuestionsSchema = Depends(),  # noqa: B008
     db: Database = db_dep,
 ) -> list[QuestionSchema]:
-    embedded = await generate_embeddings(params.question, params.model)
+    prompt_embedding = await generate_embeddings(params.prompt, params.model)
     results = await query_closest_questions(
         db,
-        embedded,
+        prompt_embedding,
         params.model,
         limit=params.limit,
         threshold=params.threshold,
