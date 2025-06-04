@@ -38,6 +38,11 @@ class QuestionSchema(BaseModel):
         examples=["2025-06-06T09:24:00Z"],
         description="UTC timestamp when the question was last updated",
     )
+    distance: float | None = Field(
+        default=None,
+        examples=[0.123456],
+        description="Distance metric for similarity search, if applicable",
+    )
 
 
 class CreateQuestionSchema(BaseModel):
@@ -104,4 +109,18 @@ class GetClosestQuestionsSchema(BaseModel):
     model: Model = Field(
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],
         description="Which embedding model to use for search",
+    )
+    threshold: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        examples=[0.7],
+        description="Maximum distance threshold for results (0.0 to 1.0, lower is closer)",
+    )
+    limit: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        examples=[10],
+        description="Maximum number of results to return",
     )

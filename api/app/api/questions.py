@@ -61,6 +61,30 @@ async def list_question_names(db: Database = db_dep) -> list[str]:
 
 
 @router.get(
+    "/closest",
+    summary="Find closest questions",
+    description="Given a query and an embedding model, return the top N closest question names.",
+    response_model=list[QuestionSchema],
+    status_code=status.HTTP_200_OK,
+    responses={404: {"description": "No questions found"}},
+    operation_id="getClosestQuestions",
+)
+async def closest_questions(
+    params: GetClosestQuestionsSchema = Depends(),  # noqa: B008
+    db: Database = db_dep,
+) -> list[QuestionSchema]:
+    embedded = await generate_embeddings(params.question, params.model)
+    results = await query_closest_questions(
+        db,
+        embedded,
+        params.model,
+        limit=params.limit,
+        threshold=params.threshold,
+    )
+    return results
+
+
+@router.get(
     "/{name:path}",
     summary="Get question by name",
     description="Return the matching question, 404 if not found.",
@@ -213,20 +237,3 @@ async def embed_questions(
 ) -> str:
     await fill_embeddings(db, payload.model, payload.all)
     return "Embeddings updated successfully"
-
-
-@router.get(
-    "/closest",
-    summary="Find closest questions",
-    description="Given a query and an embedding model, return the top-N closest question names.",
-    response_model=list[str],
-    status_code=status.HTTP_200_OK,
-    operation_id="getClosestQuestions",
-)
-async def closest_questions(
-    options: GetClosestQuestionsSchema = Depends(),  # noqa: B008
-    db: Database = db_dep,
-) -> list[str]:
-    embedded = await generate_embeddings(options.question, options.model)
-    results = await query_closest_questions(db, embedded, options.model, limit=20)
-    return [q.name for q in results]

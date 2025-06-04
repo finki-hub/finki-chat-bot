@@ -178,6 +178,7 @@ async def get_closest_questions(
             links=json.loads(row["links"]) if row["links"] else {},
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+            distance=row.get("distance", None),
         )
         for row in result
     ]
