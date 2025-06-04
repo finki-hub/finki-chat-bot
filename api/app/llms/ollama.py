@@ -34,4 +34,4 @@ async def stream_ollama_response(prompt: str, model: Model) -> StreamingResponse
                 break
             yield chunk
 
-    return StreamingResponse(async_token_gen(), media_type="text/plain")
+    return StreamingResponse(async_token_gen(), media_type="text/event-stream")
