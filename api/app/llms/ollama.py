@@ -51,7 +51,7 @@ async def generate_ollama_embeddings(text: str, model: Model) -> list[float]:
 async def stream_ollama_response(prompt: str, model: Model) -> StreamingResponse:
     """
     Stream from a singleton OllamaLLM instance, so we only pay the
-    client‐startup cost once per model.
+    client-startup cost once per model.
     """
     llm = get_llm(model)
 
