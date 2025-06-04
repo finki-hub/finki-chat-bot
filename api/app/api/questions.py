@@ -29,11 +29,6 @@ from app.utils.auth import verify_api_key
 router = APIRouter(tags=["Questions"])
 
 
-@router.get("/check", response_model=str)
-async def check() -> str:
-    return strings.API_RUNNING
-
-
 @router.get("/list", response_model=list[QuestionSchema])
 async def get_questions() -> list[QuestionSchema]:
     result = await get_questions_query()
