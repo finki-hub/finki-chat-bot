@@ -85,7 +85,7 @@ async def closest_questions(
 
 
 @router.get(
-    "/{name:path}",
+    "/name/{name:path}",
     summary="Get question by name",
     description="Return the matching question, 404 if not found.",
     response_model=QuestionSchema,
