@@ -8,7 +8,9 @@ class Settings(BaseSettings):
     )
     API_VERSION: str = "1.0.0"
 
+    API_KEY: str = "your_api_key_here"
     DATABASE_URL: str = "postgresql+asyncpg://user:password@host:port/db"
+    OLLAMA_URL: str = "http://ollama:11434"
 
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]

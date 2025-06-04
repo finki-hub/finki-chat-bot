@@ -14,29 +14,32 @@ from app.api.questions import router as questions_router
 from app.data.connection import Database
 from app.utils.settings import Settings
 
+settings = Settings()
+
 
 @asynccontextmanager
-async def lifespan(app_lifespan: FastAPI) -> AsyncGenerator[None]:
-    db_instance = Database()
-    app_lifespan.state.db = db_instance
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    """App startup/shutdown: init DB and run migrations."""
+    db = Database(dsn=settings.DATABASE_URL)
+    app.state.db = db
 
-    await db_instance.init()
-    await db_instance.run_migrations()
+    await db.init()
+    await db.run_migrations()
 
     yield
 
-    await db_instance.disconnect()
+    await db.disconnect()
 
 
 def get_db(request: Request) -> Database:
     return request.app.state.db
 
 
-def make_app(app_settings: Settings) -> FastAPI:
+def make_app(settings: Settings) -> FastAPI:
     app = FastAPI(
-        title=app_settings.APP_TITLE,
-        description=app_settings.APP_DESCRIPTION,
-        version=app_settings.API_VERSION,
+        title=settings.APP_TITLE,
+        description=settings.APP_DESCRIPTION,
+        version=settings.API_VERSION,
         lifespan=lifespan,
         openapi_tags=[
             {"name": "Chat", "description": "Chat with LLMs"},
@@ -45,15 +48,15 @@ def make_app(app_settings: Settings) -> FastAPI:
             {"name": "Health", "description": "Health check and API status"},
         ],
     )
-    app.state.settings = app_settings
+    app.state.settings = settings
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=app_settings.ALLOWED_ORIGINS,
+        allow_origins=settings.ALLOWED_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=app_settings.EXPOSE_HEADERS,
+        expose_headers=settings.EXPOSE_HEADERS,
     )
 
     db_dependency = Depends(get_db)
@@ -80,7 +83,7 @@ def make_app(app_settings: Settings) -> FastAPI:
 
     @app.get("/", tags=["Health"], summary="API Status")
     async def root() -> dict[str, str]:
-        return {"message": f"{app_settings.APP_TITLE} is running"}
+        return {"message": f"{settings.APP_TITLE} is running"}
 
     @app.get(
         "/health",
@@ -146,7 +149,6 @@ def make_app(app_settings: Settings) -> FastAPI:
 
 
 def run_application() -> None:
-    settings = Settings()
     application = make_app(settings)
 
     uvicorn.run(
