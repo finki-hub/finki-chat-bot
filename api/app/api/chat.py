@@ -34,19 +34,22 @@ router = APIRouter(
     operation_id="chatWithModel",
 )
 async def chat(
-    opts: ChatRequestSchema,
+    payload: ChatRequestSchema,
     db: Database = db_dep,
 ) -> StreamingResponse:
-    question_emb = await generate_embeddings(opts.question, opts.embeddings_model)
+    prompt_embedding = await generate_embeddings(
+        payload.prompt,
+        payload.embeddings_model,
+    )
 
-    relevant_questions = await get_closest_questions(
+    closest_questions = await get_closest_questions(
         db,
-        question_emb,
-        opts.embeddings_model,
+        prompt_embedding,
+        payload.embeddings_model,
         limit=20,
     )
 
-    context = build_context(relevant_questions)
-    prompt = build_prompt(context, opts.question)
+    context = build_context(closest_questions)
+    prompt = build_prompt(context, payload.prompt)
 
-    return await generate_response(prompt, opts.inference_model)
+    return await generate_response(prompt, payload.inference_model)

@@ -8,7 +8,7 @@ from app.llms.models import Model
 
 
 class ChatRequestSchema(BaseModel):
-    question: str = Field(
+    prompt: str = Field(
         examples=["Where is FINKI located?"],
         description="The user's free-text query to send to the chat system.",
     )
