@@ -18,6 +18,17 @@ services:
       - finki_stack_dev
     restart: unless-stopped
 
+  gpu-api:
+    build:
+      context: ./gpu-api
+      dockerfile: Dockerfile
+    ports:
+      - '8888:8888'
+    networks:
+      - finki_stack_dev
+    restart: unless-stopped
+    gpus: all
+
   db:
     image: pgvector/pgvector:pg17
     environment:
