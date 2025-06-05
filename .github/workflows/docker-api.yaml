@@ -5,6 +5,9 @@ on:
     branches:
       - 'main'
       - 'dev'
+    paths:
+      - 'api/**'
+      - '.github/workflows/docker-api.yaml'
 
 permissions:
   contents: read

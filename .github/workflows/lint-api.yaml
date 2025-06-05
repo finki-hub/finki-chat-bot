@@ -1,0 +1,48 @@
+name: Linters
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'api/**'
+      - '.github/workflows/lint-api.yaml'
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'api/**'
+      - '.github/workflows/lint-api.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  linters-api:
+    name: Ruff & MyPy (API)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install Dependencies
+        run: |
+          cd api
+          uv sync
+
+      - name: Run Ruff
+        run: |
+          cd api
+          uvx ruff check .
+
+      - name: Run MyPy
+        run: |
+          cd api
+          uvx mypy . --python-executable .venv/bin/python
