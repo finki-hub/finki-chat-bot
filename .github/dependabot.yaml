@@ -4,3 +4,8 @@ updates:
     directory: '/api'
     schedule:
       interval: 'daily'
+
+  - package-ecosystem: 'uv'
+    directory: '/gpu-api'
+    schedule:
+      interval: 'daily'
