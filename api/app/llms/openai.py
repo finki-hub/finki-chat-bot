@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator, Generator
 
 from fastapi.responses import StreamingResponse
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from app.llms.models import Model
 from app.llms.prompts import stitch_system_user
@@ -26,11 +27,11 @@ def get_openai_llm(
     if key not in _llm_clients_openai:
         _llm_clients_openai[key] = ChatOpenAI(
             model=model.value,
-            api_key=settings.OPENAI_API_KEY,
+            api_key=SecretStr(settings.OPENAI_API_KEY),
             temperature=temperature,
             top_p=top_p,
             streaming=True,
-            max_tokens=max_tokens,
+            max_tokens=max_tokens,  # type: ignore[call-arg]
         )
     return _llm_clients_openai[key]
 
