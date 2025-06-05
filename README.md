@@ -4,8 +4,6 @@ RAG chat bot for the [`FCSE Students`](https://discord.gg/finki-studenti-8109971
 
 It currently works on a dataset of documents (FAQ) by conditionally injecting them in the context if they are related to the prompt.
 
-**WARNING**: Extremely WIP! Things can and will break frequently.
-
 ## Services
 
 This project comes as a monorepo of microservices:
