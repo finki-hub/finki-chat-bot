@@ -24,6 +24,7 @@ async def stream_response(
             | Model.DEEPSEEK_R1_70B
             | Model.QWEN_2_5_72B
             | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
+            | Model.VEZILKALLM_GGUF
         ):
             return await stream_ollama_response(
                 user_prompt,
