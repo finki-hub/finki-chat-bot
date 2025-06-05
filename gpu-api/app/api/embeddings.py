@@ -1,22 +1,24 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from schema.models import Model
+from fastapi import APIRouter, status
 
 from app.llms.embeddings import get_embeddings
+from app.schemas.embeddings import EmbedRequestSchema, EmbedResponseSchema
 
-router = APIRouter(prefix="/embeddings", tags=["Embeddings"])
-
-
-class EmbedRequestSchema(BaseModel):
-    input: str | list[str]
-    model: Model
-
-
-class EmbedResponseSchema(BaseModel):
-    embeddings: list[float] | list[list[float]]
+router = APIRouter(
+    prefix="/embeddings",
+    tags=["Embeddings"],
+)
 
 
-@router.get("/embed", response_model=EmbedResponseSchema)
-async def embed(request: EmbedRequestSchema) -> EmbedResponseSchema:
-    embeddings = get_embeddings(request.input, request.model)
+@router.post(
+    "/embed",
+    summary="Generate embeddings",
+    description="Given text(s) and a model, return the embedding vector(s).",
+    response_model=EmbedResponseSchema,
+    status_code=status.HTTP_200_OK,
+    response_description="The embedding(s) as a list of floats",
+    operation_id="embedText",
+    responses={400: {"description": "Unsupported model or invalid input"}},
+)
+async def embed(payload: EmbedRequestSchema) -> EmbedResponseSchema:
+    embeddings = await get_embeddings(payload.input, payload.model)
     return EmbedResponseSchema(embeddings=embeddings)

@@ -1,14 +1,27 @@
-from schema.models import Model
+import asyncio
 
-from .bgam3 import get_bgam3_embeddings
+from fastapi import HTTPException, status
 
-embeddings_map = {
-    Model["BAAI/bge-m3"]: get_bgam3_embeddings,
+from app.llms.bge_m3 import get_bge_m3_embeddings
+from app.llms.models import Model
+
+_embeddings_map = {
+    Model.BGE_M3: get_bge_m3_embeddings,
 }
 
 
-def get_embeddings(text: str | list[str], model: Model):
-    if model not in embeddings_map:
-        raise ValueError(f"Model {model} is not supported for embeddings.")
-
-    return embeddings_map[model](text)
+async def get_embeddings(
+    texts: str | list[str],
+    model: Model,
+) -> list[float] | list[list[float]]:
+    """
+    Dispatch to the appropriate embedder, offloading blocking calls.
+    Raises HTTPException(400) if the model isn't supported.
+    """
+    embedder = _embeddings_map.get(model)
+    if embedder is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Model {model.value} is not supported for embeddings.",
+        )
+    return await asyncio.to_thread(embedder, texts)
