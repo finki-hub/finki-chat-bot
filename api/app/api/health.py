@@ -17,8 +17,9 @@ router = APIRouter(
 )
 
 
-@router.get(
+@router.api_route(
     "/",
+    methods=["GET", "HEAD"],
     summary="API Status",
     description="Returns a simple message if the API is up.",
     response_model=RootStatus,
@@ -30,8 +31,9 @@ async def root() -> RootStatus:
     return RootStatus(message="The API is up and running.")
 
 
-@router.get(
+@router.api_route(
     "/health",
+    methods=["GET", "HEAD"],
     summary="Application Health Check",
     description=(
         "Checks connectivity to the database and returns overall "

@@ -13,8 +13,9 @@ router = APIRouter(
 )
 
 
-@router.get(
+@router.api_route(
     "/",
+    methods=["GET", "HEAD"],
     summary="Service Status",
     description="Simple liveness probe; returns 200 if the service is up.",
     response_model=RootStatus,
@@ -26,8 +27,9 @@ async def root() -> RootStatus:
     return RootStatus(message="gpu-api is running.")
 
 
-@router.get(
+@router.api_route(
     "/health",
+    methods=["GET", "HEAD"],
     summary="Detailed Health Check",
     description=(
         "Performs quick checks of external dependencies (CUDA device) "
