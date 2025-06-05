@@ -12,6 +12,7 @@ class Model(Enum):
     DEEPSEEK_R1_70B = "deepseek-r1:70b"
     QWEN_2_5_72B = "qwen2.5:72b"
     DOMESTIC_YAK_8B_INSTRUCT_GGUF = "hf.co/LVSTCK/domestic-yak-8B-instruct-GGUF:Q8_0"
+    GPT_4O_MINI = "gpt-4o-mini"
 
 
 MODEL_EMBEDDINGS_COLUMNS: dict[Model, str] = {

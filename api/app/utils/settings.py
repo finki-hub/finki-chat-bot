@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     API_KEY: str = "your_api_key_here"
     DATABASE_URL: str = "postgresql+asyncpg://user:password@host:port/db"
     OLLAMA_URL: str = "http://ollama:11434"
+    OPENAI_API_KEY: str = "your_openai_api_key_here"
 
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]

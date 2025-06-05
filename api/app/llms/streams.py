@@ -2,6 +2,7 @@ from fastapi.responses import StreamingResponse
 
 from app.llms.models import Model
 from app.llms.ollama import stream_ollama_response
+from app.llms.openai import stream_openai_response
 
 
 async def stream_response(
@@ -25,6 +26,15 @@ async def stream_response(
             | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
         ):
             return await stream_ollama_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+        case Model.GPT_4O_MINI:
+            return await stream_openai_response(
                 user_prompt,
                 model,
                 system_prompt=system_prompt,
