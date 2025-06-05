@@ -2,6 +2,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """
+    Application settings.
+    """
+
     APP_TITLE: str = "FINKI Chat Bot API"
     APP_DESCRIPTION: str = (
         "API for FINKI Chat Bot, managing questions, links, and LLM interactions."

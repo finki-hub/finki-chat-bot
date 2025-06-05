@@ -5,6 +5,9 @@ from app.utils.database import embedding_to_pgvector
 
 
 async def generate_embeddings(text: str, model: Model) -> list[float]:
+    """
+    Generate embeddings for the given text using the specified model.
+    """
     match model:
         case Model.LLAMA_3_3_70B | Model.BGE_M3:
             return await generate_ollama_embeddings(text, model)
@@ -13,6 +16,11 @@ async def generate_embeddings(text: str, model: Model) -> list[float]:
 
 
 async def fill_embeddings(db: Database, model: Model, all: bool = False) -> None:
+    """
+    Fill the embeddings for all questions in the database that do not have embeddings
+    for the specified model. If `all` is True, process all questions regardless of
+    whether they already have embeddings.
+    """
     model_column = MODEL_EMBEDDINGS_COLUMNS[model]
     rows = (
         await db.fetch(

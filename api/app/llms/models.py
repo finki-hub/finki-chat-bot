@@ -3,7 +3,7 @@ from enum import Enum
 
 class Model(Enum):
     """
-    Enum class to represent different model types.
+    Enum representing the available models for inference and embeddings.
     """
 
     LLAMA_3_3_70B = "llama3.3:70b"
