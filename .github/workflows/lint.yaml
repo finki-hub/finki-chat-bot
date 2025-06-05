@@ -12,8 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  ruff-mypy:
-    name: Ruff & MyPy
+  linters-api:
+    name: Ruff & MyPy (API)
     runs-on: ubuntu-latest
 
     steps:
@@ -39,4 +39,33 @@ jobs:
       - name: Run MyPy
         run: |
           cd api
+          uvx mypy . --python-executable .venv/bin/python
+
+  linters-gpu-api:
+    name: Ruff & MyPy (GPU API)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install Dependencies
+        run: |
+          cd gpu-api
+          uv sync
+
+      - name: Run Ruff
+        run: |
+          cd gpu-api
+          uvx ruff check .
+
+      - name: Run MyPy
+        run: |
+          cd gpu-api
           uvx mypy . --python-executable .venv/bin/python

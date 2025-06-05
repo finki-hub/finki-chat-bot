@@ -1,14 +1,70 @@
 [project]
-name = "gpu-api"
+name = "finki-chat-bot-gpu-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "accelerate>=1.7.0",
-    "fastapi[standard]>=0.115.12",
+    "fastapi[all]>=0.115.12",
     "langchain>=0.3.25",
-    "starlette>=0.46.2",
     "torch>=2.7.0",
     "transformers>=4.52.4",
+]
+
+[dependency-groups]
+dev = ["mypy>=1.16.0", "ruff>=0.11.12"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "YTT",
+    "ANN",
+    "ASYNC",
+    "S",
+    "B",
+    "COM",
+    "C4",
+    "DTZ",
+    "FA",
+    "ISC",
+    "ICN",
+    "G",
+    "INP",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "TID",
+    "PTH",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "PERF",
+    "FURB",
+    "LOG",
+    "RUF",
+]
+ignore = [
+    "PLR2004",
+    "PLR0912",
+    "PLR0915",
+    "TRY003",
+    "PLR0911",
+    "RET504",
+    "RUF001",
+    "E501",
+    "PLR0913",
 ]
