@@ -1,8 +1,8 @@
 # FINKI Chat Bot
 
-RAG chat bot for the [`FCSE Students`](https://discord.gg/finki-studenti-810997107376914444) Discord server, powered by [LangChain](https://github.com/langchain-ai/langchain) and [FastAPI](https://github.com/fastapi/fastapi). Uses [PostgreSQL](https://github.com/postgres/postgres) and [pgvector](https://github.com/pgvector/pgvector) for keeping documents. Has support for multiple LLMs.
+RAG chat bot for the [`FCSE Students`](https://discord.gg/finki-studenti-810997107376914444) Discord server, powered by [LangChain](https://github.com/langchain-ai/langchain) and [FastAPI](https://github.com/fastapi/fastapi). Uses [PostgreSQL](https://github.com/postgres/postgres) and [pgvector](https://github.com/pgvector/pgvector) for keeping documents. Has support for many LLMs.
 
-It currently works on a dataset of documents (FAQ) by conditionally injecting them in the context if they are related to the prompt.
+It currently works on a dataset of documents (FAQ). It is planned to support other types of data as well.
 
 ## Services
 
