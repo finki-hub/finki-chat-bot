@@ -66,7 +66,7 @@ async def list_question_names(db: Database = db_dep) -> list[str]:
     description="Given a query and an embedding model, return the top N closest question names.",
     response_model=list[QuestionSchema],
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "No questions found"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "No questions found"}},
     operation_id="getClosestQuestions",
 )
 async def closest_questions(
@@ -90,7 +90,7 @@ async def closest_questions(
     description="Return the matching question, 404 if not found.",
     response_model=QuestionSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Question not found"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Question not found"}},
     operation_id="getQuestionByName",
 )
 async def get_question_by_name(
@@ -113,7 +113,11 @@ async def get_question_by_name(
     description="Insert a new question. 400 if one with the same name exists.",
     response_model=QuestionSchema,
     status_code=status.HTTP_201_CREATED,
-    responses={400: {"description": "Question already exists or creation failed"}},
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Question already exists or creation failed",
+        },
+    },
     dependencies=[api_key_dep],
     operation_id="createQuestion",
 )
@@ -142,8 +146,10 @@ async def create_question(
     response_model=QuestionSchema,
     status_code=status.HTTP_200_OK,
     responses={
-        400: {"description": "No fields to update or update failed"},
-        404: {"description": "Question not found"},
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "No fields to update or update failed",
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "Question not found"},
     },
     dependencies=[api_key_dep],
     operation_id="updateQuestion",
@@ -181,7 +187,7 @@ async def update_question(
     description="Delete the question, and return the deleted record.",
     response_model=QuestionSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Question not found"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Question not found"}},
     dependencies=[api_key_dep],
     operation_id="deleteQuestion",
 )
@@ -206,7 +212,7 @@ async def delete_question(
     description="Return the Nth question in insertion order (0-based), 404 if out of range.",
     response_model=QuestionSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Index out of range"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Index out of range"}},
     operation_id="getNthQuestion",
 )
 async def get_nth_question(

@@ -30,7 +30,7 @@ router = APIRouter(
     response_class=StreamingResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        200: {
+        status.HTTP_200_OK: {
             "description": "Chunked stream of SSE events",
             "content": {
                 "text/event-stream": {
@@ -41,8 +41,10 @@ router = APIRouter(
                 },
             },
         },
-        400: {"description": "Unsupported model or invalid request"},
-        504: {
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Unsupported model or invalid request",
+        },
+        status.HTTP_504_GATEWAY_TIMEOUT: {
             "description": "LLM service unavailable",
             "content": {
                 "application/json": {

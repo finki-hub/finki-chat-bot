@@ -54,7 +54,7 @@ async def list_link_names(db: Database = db_dep) -> list[str]:
     description="Return the matching link, or 404 if not found.",
     response_model=LinkSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Link not found"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Link not found"}},
     operation_id="getLinkByName",
 )
 async def get_link_by_name(name: str, db: Database = db_dep) -> LinkSchema:
@@ -74,7 +74,11 @@ async def get_link_by_name(name: str, db: Database = db_dep) -> LinkSchema:
     description="Create a link with a unique name. Returns 400 if name already exists.",
     response_model=LinkSchema,
     status_code=status.HTTP_201_CREATED,
-    responses={400: {"description": "Link already exists or creation failed"}},
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Link already exists or creation failed",
+        },
+    },
     operation_id="createLink",
 )
 async def create_link(
@@ -102,8 +106,10 @@ async def create_link(
     response_model=LinkSchema,
     status_code=status.HTTP_200_OK,
     responses={
-        400: {"description": "No updates provided or update failed"},
-        404: {"description": "Link not found"},
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "No updates provided or update failed",
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "Link not found"},
     },
     operation_id="updateLink",
 )
@@ -140,7 +146,7 @@ async def update_link(
     description="Delete the link, and return the deleted record.",
     response_model=LinkSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Link not found"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Link not found"}},
     operation_id="deleteLink",
 )
 async def delete_link(
@@ -164,7 +170,7 @@ async def delete_link(
     description="Return the Nth link in insertion order (0-based), or 404 if out of range.",
     response_model=LinkSchema,
     status_code=status.HTTP_200_OK,
-    responses={404: {"description": "Index out of range"}},
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Index out of range"}},
     operation_id="getNthLink",
 )
 async def get_nth_link(
