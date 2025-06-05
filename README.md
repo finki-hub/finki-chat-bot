@@ -8,8 +8,8 @@ It currently works on a dataset of documents (FAQ). It is planned to support oth
 
 This project comes as a monorepo of microservices:
 
-- API (`/api`) for managing documents, links and chatting
-- GPU API (`/gpu-api`) for locally executing GPU accelerated tasks like embeddings generation
+- API ([`/api`](/api)) for managing documents, links and chatting
+- GPU API ([`/gpu-api`](/gpu-api)) for locally executing GPU accelerated tasks like embeddings generation
 
 ## Quick Setup (Production)
 
