@@ -52,7 +52,7 @@ class ChatRequestSchema(BaseModel):
         ),
     )
     max_tokens: int = Field(
-        256,
+        4096,
         ge=1,
         examples=[256],
         description=(
