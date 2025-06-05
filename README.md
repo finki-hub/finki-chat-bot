@@ -6,6 +6,13 @@ It currently works on a dataset of documents (FAQ) by conditionally injecting th
 
 **WARNING**: Extremely WIP! Things can and will break frequently.
 
+## Services
+
+This project comes as a monorepo of microservices:
+
+- API (`/api`) for managing documents, links and chatting
+- GPU API (`/gpu-api`) for locally executing GPU accelerated tasks like embeddings generation
+
 ## Quick Setup (Production)
 
 It's highly recommended to do this in Docker.
@@ -31,7 +38,7 @@ This also brings up an OpenAPI instance at `localhost:8880/docs`.
 
 ## Endpoints
 
-This is an incomplete list. You may view all available endpoints on the OpenAPI instance.
+This is an incomplete list. You may view all available endpoints on the OpenAPI documentation.
 
 - `/questions/list` - get all questions
 - `/questions/name/<name>` - get a question by its name
