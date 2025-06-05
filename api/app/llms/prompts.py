@@ -1,6 +1,6 @@
 from app.schemas.questions import QuestionSchema
 
-SYSTEM_PROMPT = (
+DEFAULT_SYSTEM_PROMPT = (
     "Ти си љубезен асистент и експерт за сумаризации кој одговара на прашања поврзани со ФИНКИ. "
     "Секогаш одговарај на македонски јазик. Дај јасни, точни и концизни одговори на сите прашања "
     "што се однесуваат на универзитетот, факултетот, студиите, административните процеси и слично. "
@@ -10,11 +10,29 @@ SYSTEM_PROMPT = (
 )
 
 
-def build_prompt(context: str, text: str) -> str:
-    return f"{SYSTEM_PROMPT}\n\nКонтекст:\n{context}\n\nПрашање: {text}\n\nОдговор:"
-
-
 def build_context(questions: list[QuestionSchema]) -> str:
-    return "\n".join(
-        [f"Наслов: {q.name}\nСодржина: {q.content}" for q in questions],
-    )
+    """
+    Build a context string from a list of questions.
+    """
+    return "\n".join(f"- Наслов: {q.name}\n  Содржина: {q.content}" for q in questions)
+
+
+def build_user_prompt(context: str, prompt: str) -> str:
+    """
+    Build a user prompt for the LLM with the prompt and context.
+    """
+    return f"""\
+Контекст:
+{context}
+
+Прашање:
+{prompt}
+
+Одговор:"""
+
+
+def stitch_system_user(system: str, user_prompt: str) -> str:
+    """
+    Stitch the system prompt and user prompt into a single string for the LLM.
+    """
+    return f"<|system|> {system}\n\n<|user|> {user_prompt}\n\n<|assistant|>"

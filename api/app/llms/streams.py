@@ -1,0 +1,36 @@
+from fastapi.responses import StreamingResponse
+
+from app.llms.models import Model
+from app.llms.ollama import stream_ollama_response
+
+
+async def stream_response(
+    user_prompt: str,
+    model: Model,
+    *,
+    system_prompt: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+) -> StreamingResponse:
+    """
+    Stream a response from the specified model using the provided user prompt and system prompt.
+    """
+    match model:
+        case (
+            Model.LLAMA_3_3_70B
+            | Model.MISTRAL
+            | Model.DEEPSEEK_R1_70B
+            | Model.QWEN_2_5_72B
+            | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
+        ):
+            return await stream_ollama_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+        case _:
+            raise ValueError(f"Unsupported model: {model}")

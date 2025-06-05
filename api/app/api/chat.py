@@ -5,8 +5,8 @@ from app.data.connection import Database
 from app.data.db import get_db
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
-from app.llms.prompts import build_context, build_prompt
-from app.llms.responses import generate_response
+from app.llms.prompts import DEFAULT_SYSTEM_PROMPT, build_context, build_user_prompt
+from app.llms.streams import stream_response
 from app.schemas.chat import ChatRequestSchema
 
 db_dep = Depends(get_db)
@@ -29,6 +29,17 @@ router = APIRouter(
     response_class=StreamingResponse,
     status_code=status.HTTP_200_OK,
     responses={
+        200: {
+            "description": "Chunked stream of SSE events",
+            "content": {
+                "text/event-stream": {
+                    "schema": {
+                        "type": "string",
+                        "example": "data: Hello\n\ndata: World\n\n",
+                    },
+                },
+            },
+        },
         400: {"description": "Unsupported model or invalid request"},
     },
     operation_id="chatWithModel",
@@ -41,15 +52,20 @@ async def chat(
         payload.prompt,
         payload.embeddings_model,
     )
-
     closest_questions = await get_closest_questions(
         db,
         prompt_embedding,
         payload.embeddings_model,
         limit=20,
     )
-
     context = build_context(closest_questions)
-    prompt = build_prompt(context, payload.prompt)
+    user_prompt = build_user_prompt(context, payload.prompt)
 
-    return await generate_response(prompt, payload.inference_model)
+    return await stream_response(
+        user_prompt,
+        payload.inference_model,
+        system_prompt=DEFAULT_SYSTEM_PROMPT,
+        temperature=payload.temperature,
+        top_p=payload.top_p,
+        max_tokens=payload.max_tokens,
+    )
