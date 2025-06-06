@@ -20,6 +20,8 @@ class Model(Enum):
     DOMESTIC_YAK_8B_INSTRUCT_GGUF = "hf.co/LVSTCK/domestic-yak-8B-instruct-GGUF:Q8_0"
     VEZILKALLM_GGUF = "hf.co/mradermacher/VezilkaLLM-GGUF:Q8_0"
 
+    list_models = staticmethod(lambda: [model.value for model in Model])
+
 
 MODEL_EMBEDDINGS_COLUMNS: dict[Model, str] = {
     Model.LLAMA_3_3_70B: "embedding_llama3_3_70b",

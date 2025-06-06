@@ -6,6 +6,7 @@ from app.data.connection import Database
 from app.data.db import get_db
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
+from app.llms.models import Model
 from app.llms.prompts import DEFAULT_SYSTEM_PROMPT, build_context, build_user_prompt
 from app.llms.streams import stream_response
 from app.schemas.chat import ChatRequestSchema
@@ -88,3 +89,24 @@ async def chat(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="The LLM service is currently unavailable. Please try again later.",
         ) from e
+
+
+@router.get(
+    "/models",
+    summary="List available LLM models",
+    description="Retrieve a list of all available LLM models for chat.",
+    response_model=list[str],
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "List of available LLM models",
+            "content": {
+                "application/json": {
+                    "example": ["llama3.3:70b", "qwen2.5:72b"],
+                },
+            },
+        },
+    },
+)
+def list_models() -> list[str]:
+    return Model.list_models()
