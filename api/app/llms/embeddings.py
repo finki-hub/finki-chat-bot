@@ -1,4 +1,10 @@
+import json
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 from typing import overload
+
+from fastapi import HTTPException, status
+from fastapi.responses import StreamingResponse
 
 from app.data.connection import Database
 from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
@@ -37,29 +43,58 @@ async def generate_embeddings(
             raise ValueError(f"Unsupported model: {model}")
 
 
-async def fill_embeddings(db: Database, model: Model, all: bool = False) -> None:
+async def stream_fill_embeddings(
+    db: Database,
+    model: Model,
+    *,
+    all: bool = False,
+) -> StreamingResponse:
     """
-    Fill the embeddings for all questions in the database that do not have embeddings
-    for the specified model. If `all` is True, process all questions regardless of
-    whether they already have embeddings.
+    Stream progress of filling embeddings for all (or missing) questions.
+    Emits one SSE event per question as JSON.
     """
-    model_column = MODEL_EMBEDDINGS_COLUMNS[model]
-    rows = (
-        await db.fetch(
+    model_column = MODEL_EMBEDDINGS_COLUMNS.get(model)
+    if model_column is None:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported model: {model}",
+        )
+
+    if all:
+        rows = await db.fetch("SELECT id, name, content FROM question")
+    else:
+        rows = await db.fetch(
             f"SELECT id, name, content FROM question WHERE {model_column} IS NULL",  # noqa: S608
         )
-        if not all
-        else await db.fetch(
-            "SELECT id, name, content FROM question",
-        )
+    total = len(rows)
+
+    async def _gen() -> AsyncGenerator[str]:
+        for idx, row in enumerate(rows, start=1):
+            qid = row["id"]
+            name = row["name"]
+            text = f"Наслов: {name}\nСодржина: {row['content']}"
+            try:
+                embedding = await generate_embeddings(text, model)
+                await db.execute(
+                    f"UPDATE question SET {model_column} = $1 WHERE id = $2",  # noqa: S608
+                    embedding_to_pgvector(embedding),
+                    qid,
+                )
+                result = "ok"
+            except Exception as e:
+                result = f"error: {e!r}"
+
+            payload = {
+                "status": result,
+                "index": idx,
+                "total": total,
+                "id": str(qid),
+                "name": name,
+                "ts": datetime.now(UTC).isoformat() + "Z",
+            }
+            yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        _gen(),
+        media_type="text/event-stream",
     )
-
-    for row in rows:
-        text_to_embed = f"Наслов: {row['name']}\nСодржина: {row['content']}"
-        embedding = await generate_embeddings(text_to_embed, model)
-
-        await db.execute(
-            f"UPDATE question SET {model_column} = $1 WHERE id = $2",  # noqa: S608
-            embedding_to_pgvector(embedding),
-            row["id"],
-        )

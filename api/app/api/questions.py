@@ -1,6 +1,7 @@
 import urllib.parse
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 
 from app.data.connection import Database
 from app.data.db import get_db
@@ -16,7 +17,7 @@ from app.data.questions import (
 from app.data.questions import (
     get_closest_questions as query_closest_questions,
 )
-from app.llms.embeddings import fill_embeddings, generate_embeddings
+from app.llms.embeddings import generate_embeddings, stream_fill_embeddings
 from app.schemas.questions import (
     CreateQuestionSchema,
     EmbedQuestionsSchema,
@@ -229,17 +230,17 @@ async def get_nth_question(
 
 
 @router.post(
-    "/embed",
-    summary="(Re)generate embeddings for all questions",
-    description="Regenerates the embeddings for each question. Requires API key.",
-    response_model=str,
-    status_code=status.HTTP_202_ACCEPTED,
+    "/fill",
+    summary="Fill embeddings with progress",
+    description="Streams back per-row progress as Server-Sent Events (SSE).",
+    response_class=StreamingResponse,
+    status_code=status.HTTP_200_OK,
+    operation_id="fillEmbeddings",
+    responses={400: {"description": "Unsupported model"}},
     dependencies=[api_key_dep],
-    operation_id="embedAllQuestions",
 )
-async def embed_questions(
+async def fill_embeddings(
     payload: EmbedQuestionsSchema,
     db: Database = db_dep,
-) -> str:
-    await fill_embeddings(db, payload.model, payload.all)
-    return "Embeddings updated successfully"
+) -> StreamingResponse:
+    return await stream_fill_embeddings(db, payload.model, all=payload.all)
