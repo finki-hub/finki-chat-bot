@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -43,9 +44,19 @@ def make_app(settings: Settings) -> FastAPI:
         request: Request,
         exc: RequestValidationError,
     ) -> JSONResponse:
+        raw = exc.body
+        if isinstance(raw, bytes | bytearray):
+            try:
+                body_str = raw.decode("utf-8")
+            except Exception:
+                body_str = repr(raw)
+        else:
+            body_str = raw
+
+        content = {"detail": exc.errors(), "body": body_str}
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"detail": exc.errors(), "body": exc.body},
+            content=jsonable_encoder(content),
         )
 
     @app.exception_handler(Exception)
