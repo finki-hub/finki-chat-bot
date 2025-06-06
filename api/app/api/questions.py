@@ -37,7 +37,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/",
+    "/list",
     summary="List all questions",
     description="Returns a list of all stored questions.",
     response_model=list[QuestionSchema],

@@ -25,7 +25,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/",
+    "/list",
     summary="List all links",
     description="Return a list of all stored links.",
     response_model=list[LinkSchema],
