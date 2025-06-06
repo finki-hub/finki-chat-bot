@@ -109,4 +109,4 @@ async def chat(
     },
 )
 def list_models() -> list[str]:
-    return Model.list_models()
+    return [m.value for m in Model]
