@@ -41,8 +41,6 @@ CREATE INDEX IF NOT EXISTS question_embedding_bge_m3_idx ON question USING hnsw 
 );
 
 ALTER TABLE question
-ADD COLUMN IF NOT EXISTS embedding_text_embedding_3_large vector (1536);
+ADD COLUMN IF NOT EXISTS embedding_text_embedding_3_large vector (3072);
 
-CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_3_large_idx ON question USING hnsw (
-    embedding_text_embedding_3_large vector_cosine_ops
-);
+-- No indexing for text_embedding_3_large because indexes support up to 2000 dimensions
