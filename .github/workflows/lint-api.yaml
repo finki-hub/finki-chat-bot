@@ -45,4 +45,4 @@ jobs:
       - name: Run MyPy
         run: |
           cd api
-          uvx mypy . --python-executable .venv/bin/python
+          uvx mypy .
