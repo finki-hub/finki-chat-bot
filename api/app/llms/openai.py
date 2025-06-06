@@ -2,7 +2,7 @@ import asyncio
 from collections.abc import AsyncGenerator, Generator
 
 from fastapi.responses import StreamingResponse
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from pydantic import SecretStr
 
 from app.llms.models import Model
@@ -12,6 +12,21 @@ from app.utils.settings import Settings
 settings = Settings()
 
 _llm_clients_openai: dict[tuple[str, float, float, int], ChatOpenAI] = {}
+_openai_embedders: dict[str, OpenAIEmbeddings] = {}
+
+
+def get_openai_embedder(model: Model) -> OpenAIEmbeddings:
+    """
+    Return a singleton OpenAIEmbeddings instance for the specified model.
+    If the model is not already in the cache, create a new instance.
+    """
+    key = model.value
+    if key not in _openai_embedders:
+        _openai_embedders[key] = OpenAIEmbeddings(
+            model=model.value,
+            api_key=SecretStr(settings.OPENAI_API_KEY),
+        )
+    return _openai_embedders[key]
 
 
 def get_openai_llm(
@@ -22,6 +37,7 @@ def get_openai_llm(
 ) -> ChatOpenAI:
     """
     Return a singleton ChatOpenAI instance for the specified model and sampling parameters.
+    If the model and parameters are not already in the cache, create a new instance.
     """
     key = (model.value, temperature, top_p, max_tokens)
     if key not in _llm_clients_openai:
@@ -34,6 +50,20 @@ def get_openai_llm(
             max_tokens=max_tokens,  # type: ignore[call-arg]
         )
     return _llm_clients_openai[key]
+
+
+async def generate_openai_embeddings(
+    text: str | list[str],
+    model: Model,
+) -> list[float] | list[list[float]]:
+    """
+    Generate embeddings for the given text using the specified OpenAI model.
+    This function runs the embedding generation in a separate thread to avoid blocking the event loop.
+    """
+    emb = get_openai_embedder(model)
+    if isinstance(text, str):
+        return await asyncio.to_thread(emb.embed_query, text)
+    return await asyncio.to_thread(emb.embed_documents, text)
 
 
 async def stream_openai_response(

@@ -39,3 +39,10 @@ ADD COLUMN IF NOT EXISTS embedding_bge_m3 vector (1024);
 CREATE INDEX IF NOT EXISTS question_embedding_bge_m3_idx ON question USING hnsw (
     embedding_bge_m3 vector_cosine_ops
 );
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_text_embedding_3_large vector (1536);
+
+CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_3_large_idx ON question USING hnsw (
+    embedding_text_embedding_3_large vector_cosine_ops
+);

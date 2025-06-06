@@ -1,16 +1,38 @@
+from typing import overload
+
 from app.data.connection import Database
 from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.llms.ollama import generate_ollama_embeddings
+from app.llms.openai import generate_openai_embeddings
 from app.utils.database import embedding_to_pgvector
 
 
-async def generate_embeddings(text: str, model: Model) -> list[float]:
+@overload
+async def generate_embeddings(
+    text: str,
+    model: Model,
+) -> list[float]: ...
+
+
+@overload
+async def generate_embeddings(
+    text: list[str],
+    model: Model,
+) -> list[list[float]]: ...
+
+
+async def generate_embeddings(
+    text: str | list[str],
+    model: Model,
+) -> list[float] | list[list[float]]:
     """
     Generate embeddings for the given text using the specified model.
     """
     match model:
         case Model.LLAMA_3_3_70B | Model.BGE_M3:
             return await generate_ollama_embeddings(text, model)
+        case Model.TEXT_EMBEDDING_3_LARGE:
+            return await generate_openai_embeddings(text, model)
         case _:
             raise ValueError(f"Unsupported model: {model}")
 

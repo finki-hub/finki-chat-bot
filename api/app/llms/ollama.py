@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator, Generator
+from typing import overload
 
 from fastapi.responses import StreamingResponse
 from langchain_ollama import OllamaEmbeddings, OllamaLLM
@@ -49,13 +50,32 @@ def get_llm(
     return _llm_clients[key]
 
 
-async def generate_ollama_embeddings(text: str, model: Model) -> list[float]:
+@overload
+async def generate_ollama_embeddings(
+    text: str,
+    model: Model,
+) -> list[float]: ...
+
+
+@overload
+async def generate_ollama_embeddings(
+    text: list[str],
+    model: Model,
+) -> list[list[float]]: ...
+
+
+async def generate_ollama_embeddings(
+    text: str | list[str],
+    model: Model,
+) -> list[float] | list[list[float]]:
     """
     Generate embeddings for the given text using the specified Ollama model.
     This function runs the embedding generation in a separate thread to avoid blocking the event loop.
     """
     emb = get_embedder(model)
-    return await asyncio.to_thread(emb.embed_query, text)
+    if isinstance(text, str):
+        return await asyncio.to_thread(emb.embed_query, text)
+    return await asyncio.to_thread(emb.embed_documents, text)
 
 
 async def stream_ollama_response(
