@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-alpine AS deps
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS deps
 
 ENV UV_CREATE_VENV=1 \
     UV_VENV_PATH=/app/.venv \
