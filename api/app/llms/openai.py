@@ -25,7 +25,7 @@ def get_openai_embedder(model: Model) -> OpenAIEmbeddings:
     if key not in _openai_embedders:
         _openai_embedders[key] = OpenAIEmbeddings(
             model=model.value,
-            api_key=SecretStr(settings.OPENAI_API_KEY),
+            api_key=SecretStr(settings.OPENAI_API_KEY),  # type: ignore[call-arg]
         )
     return _openai_embedders[key]
 
