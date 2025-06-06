@@ -45,4 +45,4 @@ jobs:
       - name: Run MyPy
         run: |
           cd gpu-api
-          uvx mypy .
+          uv run --active mypy .
