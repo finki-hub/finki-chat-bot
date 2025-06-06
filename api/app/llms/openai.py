@@ -63,7 +63,8 @@ async def stream_openai_response(
                 chunk = await asyncio.to_thread(next, it, None)
                 if chunk is None:
                     break
-                yield f"data: {chunk}\n\n"
+                preserved_chunk = chunk.replace("\n", "\\n")
+                yield f"data: {preserved_chunk}\n\n"
         except asyncio.CancelledError:
             return
 
