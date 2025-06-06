@@ -7,12 +7,16 @@ class Model(Enum):
     """
 
     LLAMA_3_3_70B = "llama3.3:70b"
-    BGE_M3 = "bge-m3:latest"
     MISTRAL = "mistral:latest"
     DEEPSEEK_R1_70B = "deepseek-r1:70b"
     QWEN_2_5_72B = "qwen2.5:72b"
-    DOMESTIC_YAK_8B_INSTRUCT_GGUF = "hf.co/LVSTCK/domestic-yak-8B-instruct-GGUF:Q8_0"
+    BGE_M3 = "bge-m3:latest"
+
     GPT_4O_MINI = "gpt-4o-mini"
+    GPT_4_1_MINI = "gpt-4.1-mini"
+    GPT_4_1_NANO = "gpt-4.1-nano"
+
+    DOMESTIC_YAK_8B_INSTRUCT_GGUF = "hf.co/LVSTCK/domestic-yak-8B-instruct-GGUF:Q8_0"
     VEZILKALLM_GGUF = "hf.co/mradermacher/VezilkaLLM-GGUF:Q8_0"
 
 

@@ -34,7 +34,7 @@ async def stream_response(
                 top_p=top_p,
                 max_tokens=max_tokens,
             )
-        case Model.GPT_4O_MINI:
+        case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
             return await stream_openai_response(
                 user_prompt,
                 model,
