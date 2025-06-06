@@ -1,7 +1,17 @@
+from typing import overload
+
 import torch
 from langchain_huggingface import HuggingFaceEmbeddings
 
 _bge: HuggingFaceEmbeddings | None = None
+
+
+@overload
+def get_bge_m3_embeddings(text: str) -> list[float]: ...
+
+
+@overload
+def get_bge_m3_embeddings(text: list[str]) -> list[list[float]]: ...
 
 
 def get_bge_m3_embeddings(text: str | list[str]) -> list[float] | list[list[float]]:

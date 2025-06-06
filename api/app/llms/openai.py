@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator, Generator
+from typing import overload
 
 from fastapi.responses import StreamingResponse
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -50,6 +51,20 @@ def get_openai_llm(
             max_tokens=max_tokens,  # type: ignore[call-arg]
         )
     return _llm_clients_openai[key]
+
+
+@overload
+async def generate_openai_embeddings(
+    text: str,
+    model: Model,
+) -> list[float]: ...
+
+
+@overload
+async def generate_openai_embeddings(
+    text: list[str],
+    model: Model,
+) -> list[list[float]]: ...
 
 
 async def generate_openai_embeddings(

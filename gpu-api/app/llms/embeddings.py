@@ -1,4 +1,5 @@
 import asyncio
+from typing import overload
 
 from fastapi import HTTPException, status
 
@@ -8,6 +9,20 @@ from app.llms.models import Model
 _embeddings_map = {
     Model.BGE_M3: get_bge_m3_embeddings,
 }
+
+
+@overload
+async def get_embeddings(
+    texts: str,
+    model: Model,
+) -> list[float]: ...
+
+
+@overload
+async def get_embeddings(
+    texts: list[str],
+    model: Model,
+) -> list[list[float]]: ...
 
 
 async def get_embeddings(
