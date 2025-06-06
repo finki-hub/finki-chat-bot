@@ -1,26 +1,22 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS deps
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
 
 ENV UV_CREATE_VENV=1 \
     UV_VENV_PATH=/app/.venv \
     UV_PYTHON_MINOR=13 \
+    UV_PYTHON_DOWNLOADS=0 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=0
+    UV_LINK_MODE=copy
 
 WORKDIR /app
-
-COPY pyproject.toml uv.lock /app/
+COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --no-dev
 
-FROM deps AS builder
-
-COPY . /app
-
+COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-alpine AS final
+FROM python:3.13-bookworm AS final
 
 WORKDIR /app
 
