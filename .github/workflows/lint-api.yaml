@@ -40,7 +40,7 @@ jobs:
       - name: Run Ruff
         run: |
           cd api
-          uvx ruff check .
+          uv run --active ruff check .
 
       - name: Run MyPy
         run: |
