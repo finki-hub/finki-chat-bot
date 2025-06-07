@@ -13,9 +13,8 @@ router = APIRouter(
 )
 
 
-@router.api_route(
+@router.get(
     "/",
-    methods=["GET", "HEAD"],
     summary="Service Status",
     description="Simple liveness probe; returns 200 if the service is up.",
     response_model=RootStatus,
@@ -23,13 +22,13 @@ router = APIRouter(
     response_description="One-line status message",
     operation_id="gpuApiStatus",
 )
+@router.head("/", include_in_schema=False)
 async def root() -> RootStatus:
     return RootStatus(message="gpu-api is running.")
 
 
-@router.api_route(
+@router.get(
     "/health",
-    methods=["GET", "HEAD"],
     summary="Detailed Health Check",
     description=(
         "Performs quick checks of external dependencies (CUDA device) "
@@ -57,6 +56,7 @@ async def root() -> RootStatus:
         },
     },
 )
+@router.head("/health", include_in_schema=False)
 async def health_check() -> JSONResponse:
     cuda_ok = torch.cuda.is_available()
     dep_status = DependencyStatus(
