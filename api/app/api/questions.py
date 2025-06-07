@@ -1,6 +1,6 @@
 import urllib.parse
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.data.connection import Database
@@ -12,12 +12,14 @@ from app.data.questions import (
     get_question_by_name_query,
     get_question_names_query,
     get_questions_query,
+    get_questions_without_embeddings_query,
     update_question_query,
 )
 from app.data.questions import (
     get_closest_questions as query_closest_questions,
 )
 from app.llms.embeddings import generate_embeddings, stream_fill_embeddings
+from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.schemas.questions import (
     CreateQuestionSchema,
     EmbedQuestionsSchema,
@@ -236,7 +238,7 @@ async def get_nth_question(
     response_class=StreamingResponse,
     status_code=status.HTTP_200_OK,
     operation_id="fillEmbeddings",
-    responses={400: {"description": "Unsupported model"}},
+    responses={status.HTTP_400_BAD_REQUEST: {"description": "Unsupported model"}},
     dependencies=[api_key_dep],
 )
 async def fill_embeddings(
@@ -244,3 +246,31 @@ async def fill_embeddings(
     db: Database = db_dep,
 ) -> StreamingResponse:
     return await stream_fill_embeddings(db, payload.model, all=payload.all)
+
+
+@router.get(
+    "/unfilled",
+    summary="List questions with unfilled embeddings",
+    description="Returns a list of questions that have unfilled embeddings for the specified model.",
+    response_model=list[QuestionSchema],
+    status_code=status.HTTP_200_OK,
+    operation_id="listUnfilledQuestions",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Unsupported model specified",
+        },
+    },
+)
+async def list_unfilled_questions(
+    model: Model = Query(description="The model to check for unfilled embeddings"),  # noqa: B008
+    db: Database = db_dep,
+) -> list[QuestionSchema]:
+    if model not in MODEL_EMBEDDINGS_COLUMNS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported model: {model}",
+        )
+
+    results = await get_questions_without_embeddings_query(db, model)
+
+    return results

@@ -55,6 +55,28 @@ async def get_question_by_name_query(db: Database, name: str) -> QuestionSchema 
     )
 
 
+async def get_questions_without_embeddings_query(
+    db: Database,
+    model: Model,
+) -> list[QuestionSchema]:
+    embedding_column = MODEL_EMBEDDINGS_COLUMNS[model]
+    query = f"SELECT * FROM question WHERE {embedding_column} IS NULL ORDER BY name ASC"  # noqa: S608
+    result = await db.fetch(query)
+
+    return [
+        QuestionSchema(
+            id=row["id"],
+            name=row["name"],
+            content=row["content"],
+            user_id=row["user_id"],
+            links=json.loads(row["links"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+        for row in result
+    ]
+
+
 async def create_question_query(
     db: Database,
     question: CreateQuestionSchema,
