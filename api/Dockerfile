@@ -25,6 +25,9 @@ COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1
 
+COPY start.sh .
+RUN chmod +x start.sh
+
 HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://127.0.0.1:8880/health/ || exit 1
 
-CMD ["python", "-m", "app"]
+CMD ["./start.sh"]

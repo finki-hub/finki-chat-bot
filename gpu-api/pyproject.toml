@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "accelerate>=1.7.0",
     "fastapi[all]>=0.115.12",
+    "gunicorn>=23.0.0",
     "langchain>=0.3.25",
     "langchain-huggingface>=0.2.0",
     "sentence-transformers>=4.1.0",

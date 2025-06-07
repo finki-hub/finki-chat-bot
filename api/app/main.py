@@ -1,7 +1,6 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -27,7 +26,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     app.state.db = db
 
     await db.init()
-    await db.run_migrations()
 
     yield
 
@@ -99,18 +97,4 @@ def make_app(settings: Settings) -> FastAPI:
     return app
 
 
-def run_application() -> None:
-    """
-    Run the FastAPI application using Uvicorn.
-    """
-    application = make_app(settings)
-
-    uvicorn.run(
-        application,
-        host=settings.HOST,
-        port=settings.PORT,
-    )
-
-
-if __name__ == "__main__":
-    run_application()
+app = make_app(settings)
