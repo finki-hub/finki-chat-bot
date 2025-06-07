@@ -245,7 +245,12 @@ async def fill_embeddings(
     payload: EmbedQuestionsSchema,
     db: Database = db_dep,
 ) -> StreamingResponse:
-    return await stream_fill_embeddings(db, payload.model, all=payload.all)
+    return await stream_fill_embeddings(
+        db,
+        payload.model,
+        questions=payload.questions,
+        all=payload.all,
+    )
 
 
 @router.get(

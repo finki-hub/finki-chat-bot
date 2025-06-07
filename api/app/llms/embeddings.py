@@ -53,6 +53,7 @@ async def stream_fill_embeddings(
     db: Database,
     model: Model,
     *,
+    questions: list[str] | None = None,
     all: bool = False,
 ) -> StreamingResponse:
     """
@@ -68,6 +69,12 @@ async def stream_fill_embeddings(
 
     if all:
         rows = await db.fetch("SELECT id, name, content FROM question")
+    elif questions:
+        placeholders = ",".join(["$" + str(i + 1) for i in range(len(questions))])
+        rows = await db.fetch(
+            f"SELECT id, name, content FROM question WHERE name IN ({placeholders})",  # noqa: S608
+            *questions,
+        )
     else:
         rows = await db.fetch(
             f"SELECT id, name, content FROM question WHERE {model_column} IS NULL",  # noqa: S608

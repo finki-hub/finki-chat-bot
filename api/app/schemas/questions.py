@@ -94,6 +94,11 @@ class EmbedQuestionsSchema(BaseModel):
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],
         description="Which embedding model to use",
     )
+    questions: list[str] | None = Field(
+        default=None,
+        examples=[["reset-password", "account-setup"]],
+        description="List of question names to regenerate embeddings for. If None, all questions will be processed.",
+    )
     all: bool = Field(
         default=False,
         examples=[False],
