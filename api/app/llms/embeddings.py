@@ -73,7 +73,6 @@ async def stream_fill_embeddings(
             )
         models_to_process = [model]
 
-    # Pre-fetch questions if a specific list or all questions are requested
     question_rows = []
     if all_questions:
         question_rows = await db.fetch("SELECT id, name, content FROM question")
