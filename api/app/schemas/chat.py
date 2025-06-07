@@ -12,6 +12,14 @@ class ChatRequestSchema(BaseModel):
         examples=["Where is FINKI located?"],
         description="The user's free-text query to send to the chat system.",
     )
+    system_prompt: str | None = Field(
+        None,
+        examples=["You are a helpful assistant."],
+        description=(
+            "The system prompt to use for the chat. "
+            "This is a fixed prompt that sets the context for the chat model."
+        ),
+    )
     embeddings_model: Model = Field(
         DEFAULT_EMBEDDINGS_MODEL,
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],

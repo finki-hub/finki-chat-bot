@@ -75,11 +75,12 @@ async def chat(
         )
         context = build_context(closest_questions)
         user_prompt = build_user_prompt(context, payload.prompt)
+        system_prompt = payload.system_prompt or DEFAULT_SYSTEM_PROMPT
 
         return await stream_response(
             user_prompt,
             payload.inference_model,
-            system_prompt=DEFAULT_SYSTEM_PROMPT,
+            system_prompt=system_prompt,
             temperature=payload.temperature,
             top_p=payload.top_p,
             max_tokens=payload.max_tokens,
