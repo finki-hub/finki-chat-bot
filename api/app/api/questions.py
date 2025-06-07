@@ -21,9 +21,9 @@ from app.data.questions import (
 from app.llms.embeddings import generate_embeddings, stream_fill_embeddings
 from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.schemas.questions import (
+    ClosestQuestionsSchema,
     CreateQuestionSchema,
-    EmbedQuestionsSchema,
-    GetClosestQuestionsSchema,
+    FillEmbeddingsSchema,
     QuestionSchema,
     UpdateQuestionSchema,
 )
@@ -73,7 +73,7 @@ async def list_question_names(db: Database = db_dep) -> list[str]:
     operation_id="getClosestQuestions",
 )
 async def closest_questions(
-    params: GetClosestQuestionsSchema = Depends(),  # noqa: B008
+    params: ClosestQuestionsSchema = Depends(),  # noqa: B008
     db: Database = db_dep,
 ) -> list[QuestionSchema]:
     prompt_embedding = await generate_embeddings(params.prompt, params.embeddings_model)
@@ -242,7 +242,7 @@ async def get_nth_question(
     dependencies=[api_key_dep],
 )
 async def fill_embeddings(
-    payload: EmbedQuestionsSchema,
+    payload: FillEmbeddingsSchema,
     db: Database = db_dep,
 ) -> StreamingResponse:
     return await stream_fill_embeddings(

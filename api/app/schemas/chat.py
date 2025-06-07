@@ -7,7 +7,7 @@ from app.constants.defaults import (
 from app.llms.models import Model
 
 
-class ChatRequestSchema(BaseModel):
+class ChatSchema(BaseModel):
     prompt: str = Field(
         examples=["Where is FINKI located?"],
         description="The user's free-text query to send to the chat system.",

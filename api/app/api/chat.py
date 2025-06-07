@@ -9,7 +9,7 @@ from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
 from app.llms.prompts import DEFAULT_SYSTEM_PROMPT, build_context, build_user_prompt
 from app.llms.streams import stream_response
-from app.schemas.chat import ChatRequestSchema
+from app.schemas.chat import ChatSchema
 
 db_dep = Depends(get_db)
 
@@ -59,7 +59,7 @@ router = APIRouter(
     operation_id="chatWithModel",
 )
 async def chat(
-    payload: ChatRequestSchema,
+    payload: ChatSchema,
     db: Database = db_dep,
 ) -> StreamingResponse:
     try:

@@ -89,7 +89,7 @@ class UpdateQuestionSchema(BaseModel):
     )
 
 
-class EmbedQuestionsSchema(BaseModel):
+class FillEmbeddingsSchema(BaseModel):
     embeddings_model: Model = Field(
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],
         description="Which embedding model to use",
@@ -111,7 +111,7 @@ class EmbedQuestionsSchema(BaseModel):
     )
 
 
-class GetClosestQuestionsSchema(BaseModel):
+class ClosestQuestionsSchema(BaseModel):
     prompt: str = Field(
         examples=["What is the capital of France?"],
         description="Query string to embed and search",
