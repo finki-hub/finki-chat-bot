@@ -76,11 +76,11 @@ async def closest_questions(
     params: GetClosestQuestionsSchema = Depends(),  # noqa: B008
     db: Database = db_dep,
 ) -> list[QuestionSchema]:
-    prompt_embedding = await generate_embeddings(params.prompt, params.model)
+    prompt_embedding = await generate_embeddings(params.prompt, params.embeddings_model)
     results = await query_closest_questions(
         db,
         prompt_embedding,
-        params.model,
+        params.embeddings_model,
         limit=params.limit,
         threshold=params.threshold,
     )
@@ -247,9 +247,10 @@ async def fill_embeddings(
 ) -> StreamingResponse:
     return await stream_fill_embeddings(
         db,
-        payload.model,
+        payload.embeddings_model,
         questions=payload.questions,
-        all=payload.all,
+        all_questions=payload.all_questions,
+        all_models=payload.all_models,
     )
 
 

@@ -63,8 +63,9 @@ async def chat(
     db: Database = db_dep,
 ) -> StreamingResponse:
     try:
+        query_to_embed = f"пребарување: {payload.prompt}"
         prompt_embedding = await generate_embeddings(
-            payload.prompt,
+            query_to_embed,
             payload.embeddings_model,
         )
         closest_questions = await get_closest_questions(

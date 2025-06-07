@@ -54,58 +54,93 @@ async def stream_fill_embeddings(
     model: Model,
     *,
     questions: list[str] | None = None,
-    all: bool = False,
+    all_questions: bool = False,
+    all_models: bool = False,
 ) -> StreamingResponse:
     """
-    Stream progress of filling embeddings for all (or missing) questions.
-    Emits one SSE event per question as JSON.
+    Stream progress of filling embeddings for questions.
+    Can process a single model or all available embedding models.
+    Emits one SSE event per question-model combination as JSON.
     """
-    model_column = MODEL_EMBEDDINGS_COLUMNS.get(model)
-    if model_column is None:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported model: {model}",
-        )
+    models_to_process: list[Model]
+    if all_models:
+        models_to_process = list(MODEL_EMBEDDINGS_COLUMNS.keys())
+    else:
+        if model not in MODEL_EMBEDDINGS_COLUMNS:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported embedding model: {model.value}",
+            )
+        models_to_process = [model]
 
-    if all:
-        rows = await db.fetch("SELECT id, name, content FROM question")
+    # Pre-fetch questions if a specific list or all questions are requested
+    question_rows = []
+    if all_questions:
+        question_rows = await db.fetch("SELECT id, name, content FROM question")
     elif questions:
         placeholders = ",".join(["$" + str(i + 1) for i in range(len(questions))])
-        rows = await db.fetch(
+        question_rows = await db.fetch(
             f"SELECT id, name, content FROM question WHERE name IN ({placeholders})",  # noqa: S608
             *questions,
         )
-    else:
-        rows = await db.fetch(
-            f"SELECT id, name, content FROM question WHERE {model_column} IS NULL",  # noqa: S608
-        )
-    total = len(rows)
 
     async def _gen() -> AsyncGenerator[str]:
-        for idx, row in enumerate(rows, start=1):
-            qid = row["id"]
-            name = row["name"]
-            text = f"Наслов: {name}\nСодржина: {row['content']}"
-            try:
-                embedding = await generate_embeddings(text, model)
-                await db.execute(
-                    f"UPDATE question SET {model_column} = $1 WHERE id = $2",  # noqa: S608
-                    embedding_to_pgvector(embedding),
-                    qid,
-                )
-                result = "ok"
-            except Exception as e:
-                result = f"error: {e!r}"
+        progress_counter = 0
+        total_tasks = 0
 
-            payload = {
-                "status": result,
-                "index": idx,
-                "total": total,
-                "id": str(qid),
-                "name": name,
-                "ts": datetime.now(UTC).isoformat() + "Z",
-            }
-            yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+        if question_rows:
+            total_tasks = len(question_rows) * len(models_to_process)
+        else:
+            for m in models_to_process:
+                col = MODEL_EMBEDDINGS_COLUMNS[m]
+                count_result = await db.fetchval(
+                    f"SELECT COUNT(*) FROM question WHERE {col} IS NULL",  # noqa: S608
+                )
+                total_tasks += int(count_result) if count_result else 0
+
+        for current_model in models_to_process:
+            model_column = MODEL_EMBEDDINGS_COLUMNS[current_model]
+
+            rows_for_this_model = []
+            if question_rows:
+                rows_for_this_model = question_rows
+            else:
+                rows_for_this_model = await db.fetch(
+                    f"SELECT id, name, content FROM question WHERE {model_column} IS NULL",  # noqa: S608
+                )
+
+            for row in rows_for_this_model:
+                progress_counter += 1
+                qid = row["id"]
+                name = row["name"]
+                result = "ok"
+                error_detail = ""
+
+                try:
+                    document_text = f"Наслов: {name}\nСодржина: {row['content']}"
+                    text_to_embed = f"преземи документ: {document_text}"
+
+                    embedding = await generate_embeddings(text_to_embed, current_model)
+                    await db.execute(
+                        f"UPDATE question SET {model_column} = $1 WHERE id = $2",  # noqa: S608
+                        embedding_to_pgvector(embedding),
+                        qid,
+                    )
+                except Exception as e:
+                    result = "error"
+                    error_detail = repr(e)
+
+                payload = {
+                    "status": result,
+                    "error": error_detail,
+                    "index": progress_counter,
+                    "total": total_tasks,
+                    "model": current_model.value,
+                    "id": str(qid),
+                    "name": name,
+                    "ts": datetime.now(UTC).isoformat() + "Z",
+                }
+                yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(
         _gen(),

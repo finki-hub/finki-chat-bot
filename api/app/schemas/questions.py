@@ -90,7 +90,7 @@ class UpdateQuestionSchema(BaseModel):
 
 
 class EmbedQuestionsSchema(BaseModel):
-    model: Model = Field(
+    embeddings_model: Model = Field(
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],
         description="Which embedding model to use",
     )
@@ -99,10 +99,15 @@ class EmbedQuestionsSchema(BaseModel):
         examples=[["reset-password", "account-setup"]],
         description="List of question names to regenerate embeddings for. If None, all questions will be processed.",
     )
-    all: bool = Field(
+    all_questions: bool = Field(
         default=False,
         examples=[False],
         description="Whether to regenerate _all_ embeddings vs. only missing ones",
+    )
+    all_models: bool = Field(
+        default=False,
+        examples=[False],
+        description="Whether to regenerate embeddings for all models or just the specified one",
     )
 
 
@@ -111,7 +116,7 @@ class GetClosestQuestionsSchema(BaseModel):
         examples=["What is the capital of France?"],
         description="Query string to embed and search",
     )
-    model: Model = Field(
+    embeddings_model: Model = Field(
         default=DEFAULT_EMBEDDINGS_MODEL,
         examples=[DEFAULT_EMBEDDINGS_MODEL.value],
         description="Which embedding model to use for search",
