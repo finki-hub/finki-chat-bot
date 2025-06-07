@@ -44,3 +44,10 @@ ALTER TABLE question
 ADD COLUMN IF NOT EXISTS embedding_text_embedding_3_large vector (3072);
 
 -- No indexing for text_embedding_3_large because indexes support up to 2000 dimensions
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_text_embedding_004 vector (768);
+
+CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_004_idx ON question USING hnsw (
+    embedding_text_embedding_004 vector_cosine_ops
+);

@@ -1,5 +1,6 @@
 from fastapi.responses import StreamingResponse
 
+from app.llms.google import stream_google_response
 from app.llms.models import Model
 from app.llms.ollama import stream_ollama_response
 from app.llms.openai import stream_openai_response
@@ -34,6 +35,7 @@ async def stream_response(
                 top_p=top_p,
                 max_tokens=max_tokens,
             )
+
         case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
             return await stream_openai_response(
                 user_prompt,
@@ -43,5 +45,16 @@ async def stream_response(
                 top_p=top_p,
                 max_tokens=max_tokens,
             )
+
+        case Model.GEMINI_2_5_FLASH_PREVIEW_05_20:
+            return await stream_google_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+
         case _:
             raise ValueError(f"Unsupported model: {model}")
