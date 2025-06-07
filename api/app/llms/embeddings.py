@@ -96,7 +96,8 @@ async def stream_fill_embeddings(
                 count_result = await db.fetchval(
                     f"SELECT COUNT(*) FROM question WHERE {col} IS NULL",  # noqa: S608
                 )
-                total_tasks += int(count_result) if count_result else 0
+                if isinstance(count_result, int | str):
+                    total_tasks += int(count_result)
 
         for current_model in models_to_process:
             model_column = MODEL_EMBEDDINGS_COLUMNS[current_model]
