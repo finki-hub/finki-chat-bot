@@ -138,7 +138,6 @@ async def stream_openai_agent_response(
         llm = get_openai_llm(model, temperature, top_p, max_tokens)
 
         client = await get_mcp_client()
-        print(client.__dict__)
         tools = await client.get_tools()
 
         if not tools:
