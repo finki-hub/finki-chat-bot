@@ -7,3 +7,4 @@ class Model(Enum):
     """
 
     BGE_M3 = "bge-m3:latest"
+    MULTILINGUAL_E5_LARGE = "multilingual-e5-large:latest"

@@ -5,9 +5,11 @@ from fastapi import HTTPException, status
 
 from app.llms.bge_m3 import get_bge_m3_embeddings
 from app.llms.models import Model
+from app.llms.multilingual_e5_large import get_multilingual_e5_large_embeddings
 
 _embeddings_map = {
     Model.BGE_M3: get_bge_m3_embeddings,
+    Model.MULTILINGUAL_E5_LARGE: get_multilingual_e5_large_embeddings,
 }
 
 
