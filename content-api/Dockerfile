@@ -30,4 +30,4 @@ RUN chmod +x start.sh
 
 HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://127.0.0.1:8808/health/ || exit 1
 
-CMD ["./start.sh"]
+CMD ["mcp", "run", "-t", "streamable-http", "app/main.py"]
