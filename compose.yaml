@@ -32,6 +32,10 @@ services:
       - finki_stack_dev
     restart: unless-stopped
     gpus: all
+    volumes:
+      - ./hf_cache:/huggingface_cache
+    environment:
+      HF_HOME: /huggingface_cache
 
   content-api:
     build:

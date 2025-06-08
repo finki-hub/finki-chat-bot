@@ -8,3 +8,6 @@ pgadmin/
 # Scripts
 scripts/*.json
 scripts/*.sql
+
+# HuggingFace
+hf_cache/
