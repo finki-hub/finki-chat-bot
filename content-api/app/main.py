@@ -1,5 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent, ToolAnnotations
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse
 from tools.consultations import get_consultations_for_staff
 from tools.staff import get_staff
 from utils.settings import Settings
@@ -15,6 +17,10 @@ def make_app(settings: Settings) -> FastMCP:
         port=settings.PORT,
         host=settings.HOST,
     )
+
+    @mcp.custom_route("/health", methods=["GET", "HEAD"])
+    async def health_check(request: Request) -> PlainTextResponse:
+        return PlainTextResponse("OK")
 
     @mcp.tool(
         name="get_staff",
