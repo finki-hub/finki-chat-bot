@@ -1,11 +1,10 @@
-import multiprocessing
 import os
 
 host = os.getenv("HOST", "0.0.0.0")  # noqa: S104
 port = os.getenv("PORT", "8880")
 bind = f"{host}:{port}"
 
-workers = int(os.getenv("WORKERS", multiprocessing.cpu_count() * 2 + 1))
+workers = int(os.getenv("WORKERS", "4"))
 
 worker_class = "uvicorn.workers.UvicornWorker"
 
