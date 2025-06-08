@@ -5,21 +5,21 @@ on:
     branches:
       - 'main'
     paths:
-      - 'api/**'
-      - '.github/workflows/lint-api.yaml'
+      - 'content-api/**'
+      - '.github/workflows/lint-content-api.yaml'
   pull_request:
     branches:
       - 'main'
     paths:
-      - 'api/**'
-      - '.github/workflows/lint-api.yaml'
+      - 'content-api/**'
+      - '.github/workflows/lint-content-api.yaml'
 
 permissions:
   contents: read
 
 jobs:
   linters:
-    name: Ruff & MyPy (API)
+    name: Ruff & MyPy (Content API)
     runs-on: ubuntu-latest
 
     steps:
@@ -34,15 +34,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd api
+          cd content-api
           uv sync
 
       - name: Run Ruff
         run: |
-          cd api
+          cd content-api
           uv run --active ruff check .
 
       - name: Run MyPy
         run: |
-          cd api
+          cd content-api
           uv run --active mypy .

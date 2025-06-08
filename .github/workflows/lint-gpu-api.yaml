@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 jobs:
-  linters-gpu-api:
+  linters:
     name: Ruff & MyPy (GPU API)
     runs-on: ubuntu-latest
 
