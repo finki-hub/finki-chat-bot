@@ -1,7 +1,7 @@
 import os
 
 host = os.getenv("HOST", "0.0.0.0")  # noqa: S104
-port = os.getenv("PORT", "8880")
+port = os.getenv("PORT", "8888")
 bind = f"{host}:{port}"
 
 workers = 1
