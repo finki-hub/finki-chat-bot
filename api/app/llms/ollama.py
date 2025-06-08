@@ -159,7 +159,8 @@ async def stream_ollama_agent_response(
         async def async_token_gen() -> AsyncGenerator[str]:
             try:
                 async for chunk in agent.astream(
-                    {"messages": messages}, {"configurable": {"thread_id": "default"}}
+                    {"messages": messages},
+                    {"configurable": {"thread_id": "default"}},
                 ):
                     if "agent" in chunk:
                         agent_messages = chunk["agent"]["messages"]

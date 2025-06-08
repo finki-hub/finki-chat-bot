@@ -181,7 +181,7 @@ async def stream_openai_agent_response(
             media_type="text/event-stream",
         )
 
-    except Exception as e:
+    except Exception:
         return await stream_openai_response(
             user_prompt,
             model,
