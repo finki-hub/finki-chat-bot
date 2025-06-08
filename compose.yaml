@@ -31,6 +31,16 @@ services:
     restart: unless-stopped
     gpus: all
 
+  content-api:
+    build:
+      context: ./content-api
+      dockerfile: Dockerfile
+    ports:
+      - '8808:8808'
+    networks:
+      - finki_stack_dev
+    restart: unless-stopped
+
   db:
     image: pgvector/pgvector:pg17
     environment:
