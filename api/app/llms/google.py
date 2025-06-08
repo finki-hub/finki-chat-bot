@@ -5,8 +5,10 @@ from typing import overload
 from fastapi.responses import StreamingResponse
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langgraph.prebuilt import create_react_agent
 from pydantic import SecretStr
 
+from app.llms.mcp import get_mcp_client
 from app.llms.models import Model
 from app.utils.settings import Settings
 
@@ -121,3 +123,73 @@ async def stream_google_response(
         async_token_gen(),
         media_type="text/event-stream",
     )
+
+
+async def stream_google_agent_response(
+    user_prompt: str,
+    model: Model,
+    *,
+    system_prompt: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+) -> StreamingResponse:
+    """
+    Stream a response from a Google agent with MCP tools.
+    Falls back to regular response if MCP unavailable.
+    """
+    try:
+        llm = get_google_llm(model, temperature, top_p, max_tokens)
+
+        client = await get_mcp_client()
+        tools = await client.get_tools()
+
+        if not tools:
+            return await stream_google_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+
+        agent = create_react_agent(llm, tools)
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        async def async_token_gen() -> AsyncGenerator[str]:
+            try:
+                async for chunk in agent.astream(
+                    {"messages": messages},
+                    {"configurable": {"thread_id": "default"}},
+                ):
+                    if "agent" in chunk:
+                        agent_messages = chunk["agent"]["messages"]
+                        for message in agent_messages:
+                            if hasattr(message, "content") and message.content:
+                                content = str(message.content)
+                                preserved_content = content.replace("\n", "\\n")
+                                yield f"data: {preserved_content}\n\n"
+
+            except Exception as e:
+                error_msg = f"Agent error: {e!s}"
+                yield f"data: {error_msg}\n\n"
+
+        return StreamingResponse(
+            async_token_gen(),
+            media_type="text/event-stream",
+        )
+
+    except Exception:
+        return await stream_google_response(
+            user_prompt,
+            model,
+            system_prompt=system_prompt,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+        )

@@ -12,8 +12,12 @@ class Settings(BaseSettings):
     )
     API_VERSION: str = "1.0.0"
 
+    GPU_API_URL: str = "http://gpu-api:8888"
+    CONTENT_API_URL: str = "http://content-api:8808/mcp"
+
     API_KEY: str = "your_api_key_here"
     DATABASE_URL: str = "postgresql+asyncpg://user:password@host:port/db"
+
     OLLAMA_URL: str = "http://ollama:11434"
     OPENAI_API_KEY: str = "your_openai_api_key_here"
     GOOGLE_API_KEY: str = "your_google_api_key_here"

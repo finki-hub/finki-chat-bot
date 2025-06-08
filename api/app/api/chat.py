@@ -5,10 +5,12 @@ from ollama import ResponseError
 from app.data.connection import Database
 from app.data.db import get_db
 from app.data.questions import get_closest_questions
+from app.llms.chat import handle_agent_chat, handle_regular_chat
 from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
-from app.llms.prompts import DEFAULT_SYSTEM_PROMPT, build_context, build_user_prompt
-from app.llms.streams import stream_response
+from app.llms.prompts import (
+    build_context,
+)
 from app.schemas.chat import ChatSchema
 
 db_dep = Depends(get_db)
@@ -75,17 +77,12 @@ async def chat(
             limit=20,
         )
         context = build_context(closest_questions)
-        user_prompt = build_user_prompt(context, payload.prompt)
-        system_prompt = payload.system_prompt or DEFAULT_SYSTEM_PROMPT
 
-        return await stream_response(
-            user_prompt,
-            payload.inference_model,
-            system_prompt=system_prompt,
-            temperature=payload.temperature,
-            top_p=payload.top_p,
-            max_tokens=payload.max_tokens,
-        )
+        if payload.use_agent:
+            return await handle_agent_chat(payload, context)
+
+        return await handle_regular_chat(payload, context)
+
     except ResponseError as e:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,

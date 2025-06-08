@@ -68,3 +68,12 @@ class ChatSchema(BaseModel):
             "This limits the length of the output."
         ),
     )
+    use_agent: bool = Field(
+        True,
+        examples=[False],
+        description=(
+            "Whether to use an agent for the chat. "
+            "If True, the system will use an agent to handle the query, "
+            "otherwise it will use a direct response generation."
+        ),
+    )
