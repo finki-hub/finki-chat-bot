@@ -1,17 +1,33 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
+
+ENV UV_CREATE_VENV=1 \
+    UV_VENV_PATH=/app/.venv \
+    UV_PYTHON_MINOR=13 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+FROM python:3.13-bookworm AS final
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y wget git && rm -rf /var/lib/apt/lists/* && pip install --upgrade pip && pip install torch==2.7.1+cu118 torchvision==0.22.1+cu118 torchaudio==2.7.1+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+COPY --from=builder --chown=app:app /app /app
 
-COPY pyproject.toml uv.lock ./
+ENV PATH="/app/.venv/bin:${PATH}" \
+    PYTHONUNBUFFERED=1
 
-RUN pip install uv && uv pip compile pyproject.toml -o requirements.txt && pip install --no-cache-dir -r requirements.txt
+COPY start.sh .
+RUN chmod +x start.sh
 
-COPY . /app
+HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://127.0.0.1:8808/health/ || exit 1
 
-ENV PYTHONUNBUFFERED=1
-
-HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://127.0.0.1:8888/health/ || exit 1
-
-CMD ["mcp", "run", "-t", "streamable-http", "app/main.py"]
+CMD ["./start.sh"]
