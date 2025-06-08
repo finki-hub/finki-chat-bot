@@ -8,9 +8,9 @@ It currently works on a dataset of documents (FAQ). It is planned to support oth
 
 This project comes as a monorepo of microservices:
 
-- API ([`/api`](/api)) for managing documents, links and chatting
-- GPU API ([`/gpu-api`](/gpu-api)) for locally executing GPU accelerated tasks like embeddings generation
-- Content API ([`/content-api`](/content-api/)) for providing external data for RAG using MCP
+- API ([`/api`](/api)) for managing documents, links and chatting (default port: 8880)
+- GPU API ([`/gpu-api`](/gpu-api)) for locally executing GPU accelerated tasks like embeddings generation (default port: 8888)
+- Content API ([`/content-api`](/content-api/)) for providing external data for RAG using MCP (default port: 8808)
 - Front end (WIP)
 - Database (PostgreSQL + pgvector) for keeping documents and embeddings
 
