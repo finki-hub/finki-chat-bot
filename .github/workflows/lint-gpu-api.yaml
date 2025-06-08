@@ -1,4 +1,4 @@
-name: Linters
+name: Linters (GPU API)
 
 on:
   push:

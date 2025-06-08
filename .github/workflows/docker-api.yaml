@@ -1,4 +1,4 @@
-name: Docker
+name: Docker Build (API)
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   docker:
-    name: Docker Image
+    name: Docker Build (API)
     runs-on: ubuntu-latest
 
     steps:
