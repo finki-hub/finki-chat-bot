@@ -2,10 +2,9 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent, ToolAnnotations
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
-
-from .tools.consultations import get_consultations_for_staff
-from .tools.staff import get_staff
-from .utils.settings import Settings
+from tools.consultations import get_consultations_for_staff
+from tools.staff import get_staff
+from utils.settings import Settings
 
 settings = Settings()
 
