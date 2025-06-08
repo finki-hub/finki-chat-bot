@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.llms.embeddings import get_embeddings
+from app.llms.embeddings import generate_embeddings
 from app.schemas.embeddings import EmbedRequestSchema, EmbedResponseSchema
 
 router = APIRouter(
@@ -24,5 +24,5 @@ router = APIRouter(
     },
 )
 async def embed(payload: EmbedRequestSchema) -> EmbedResponseSchema:
-    embeddings = await get_embeddings(payload.input, payload.model)
+    embeddings = await generate_embeddings(payload.input, payload.embeddings_model)
     return EmbedResponseSchema(embeddings=embeddings)

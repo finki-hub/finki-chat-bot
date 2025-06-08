@@ -12,20 +12,20 @@ _embeddings_map = {
 
 
 @overload
-async def get_embeddings(
+async def generate_embeddings(
     texts: str,
     model: Model,
 ) -> list[float]: ...
 
 
 @overload
-async def get_embeddings(
+async def generate_embeddings(
     texts: list[str],
     model: Model,
 ) -> list[list[float]]: ...
 
 
-async def get_embeddings(
+async def generate_embeddings(
     texts: str | list[str],
     model: Model,
 ) -> list[float] | list[list[float]]:

@@ -13,7 +13,7 @@ class EmbedRequestSchema(BaseModel):
             ["Hello world", "FastAPI is great"],
         ],
     )
-    model: Model = Field(
+    embeddings_model: Model = Field(
         description="Which embedding model to use",
         examples=[Model.BGE_M3.value],
     )
