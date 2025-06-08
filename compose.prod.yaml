@@ -11,11 +11,21 @@ services:
       OLLAMA_URL: ${OLLAMA_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GPU_API_URL: ${GPU_API_URL}
+      CONTENT_API_URL: ${CONTENT_API_URL}
     depends_on:
       db:
         condition: service_healthy
     networks:
       - finki_stack
+    restart: unless-stopped
+
+  content-api:
+    image: ghcr.io/finki-hub/finki-chat-bot-content-api:latest
+    ports:
+      - '8808:8808'
+    networks:
+      - finki_stack_dev
     restart: unless-stopped
 
   db:
