@@ -45,4 +45,4 @@ jobs:
       - name: Run MyPy
         run: |
           cd content-api
-          MYPYPATH=. uv run --active mypy .
+          uv run --active mypy .
