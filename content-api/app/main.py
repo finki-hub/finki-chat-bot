@@ -1,8 +1,8 @@
 from mcp.server.fastmcp import FastMCP
-from mcp.types import TextContent
-
-from .tools.staff import get_staff
-from .utils.settings import Settings
+from mcp.types import TextContent, ToolAnnotations
+from tools.consultations import get_consultations_for_staff
+from tools.staff import get_staff
+from utils.settings import Settings
 
 settings = Settings()
 
@@ -16,7 +16,17 @@ def make_app(settings: Settings) -> FastMCP:
         host=settings.HOST,
     )
 
-    @mcp.tool(name="get_staff", description="Преземи листа од наставен кадар од ФИНКИ")
+    @mcp.tool(
+        name="get_staff",
+        description="Преземи листа од наставниот кадар на ФИНКИ",
+        annotations=ToolAnnotations(
+            title="Преземи наставен кадар",
+            readOnlyHint=True,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        ),
+    )
     async def get_staff_tool() -> list[TextContent]:
         result = await get_staff()
 
@@ -24,6 +34,25 @@ def make_app(settings: Settings) -> FastMCP:
             return [TextContent(type="text", text=result)]
 
         return [TextContent(type="text", text=name) for name in result]
+
+    @mcp.tool(
+        name="get_consultations_for_staff",
+        description="Преземи закажани термини за консултации за член на наставниот кадар на ФИНКИ",
+        annotations=ToolAnnotations(
+            title="Преземи термини за консултации",
+            readOnlyHint=True,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        ),
+    )
+    async def get_consultations_for_staff_tool(staff_name: str) -> list[TextContent]:
+        result = await get_consultations_for_staff(staff_name)
+
+        if isinstance(result, str):
+            return [TextContent(type="text", text=result)]
+
+        return [TextContent(type="text", text=consultation) for consultation in result]
 
     return mcp
 
