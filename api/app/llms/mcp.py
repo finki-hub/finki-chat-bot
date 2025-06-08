@@ -1,6 +1,9 @@
 from datetime import timedelta
 
-from langchain_mcp_adapters.client import MultiServerMCPClient, StreamableHttpConnection
+from langchain_mcp_adapters.client import (  # type: ignore[import-untyped]
+    MultiServerMCPClient,
+    StreamableHttpConnection,
+)
 
 from app.utils.settings import Settings
 

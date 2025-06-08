@@ -1,7 +1,8 @@
 from mcp.server.fastmcp import FastMCP
 from mcp.types import TextContent
-from tools.staff import get_staff
-from utils.settings import Settings
+
+from .tools.staff import get_staff
+from .utils.settings import Settings
 
 settings = Settings()
 
