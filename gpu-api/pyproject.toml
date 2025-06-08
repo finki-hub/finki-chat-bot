@@ -31,6 +31,9 @@ torchvision = [
     { index = "pytorch-cu118", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 
+[tool.mypy]
+python_version = "3.13"
+
 [tool.ruff]
 target-version = "py313"
 
