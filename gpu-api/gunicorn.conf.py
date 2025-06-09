@@ -6,6 +6,8 @@ bind = f"{host}:{port}"
 
 workers = 1
 
+timeout = 300
+
 worker_class = "uvicorn.workers.UvicornWorker"
 
 accesslog = "-"

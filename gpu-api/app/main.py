@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.embeddings import router as embeddings_router
 from app.api.health import router as health_router
+from app.api.streams import router as streams_router
 from app.utils.settings import Settings
 
 settings = Settings()
@@ -38,6 +39,7 @@ def make_app(settings: Settings) -> FastAPI:
     )
 
     app.include_router(embeddings_router)
+    app.include_router(streams_router)
     app.include_router(health_router)
 
     @app.exception_handler(RequestValidationError)

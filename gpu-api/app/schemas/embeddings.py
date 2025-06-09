@@ -7,7 +7,6 @@ class EmbedRequestSchema(BaseModel):
     input: str | list[str] = Field(
         description="A single string or list of strings to embed",
         min_length=1,
-        max_length=1000,
         examples=[
             "What is the capital of France?",
             ["Hello world", "FastAPI is great"],
