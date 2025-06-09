@@ -77,3 +77,11 @@ class ChatSchema(BaseModel):
             "otherwise it will use a direct response generation."
         ),
     )
+    rerank_documents: bool = Field(
+        True,
+        examples=[False],
+        description=(
+            "Whether to re-rank documents based on their relevance to the query. "
+            "If True, the system will re-rank documents before generating a response."
+        ),
+    )

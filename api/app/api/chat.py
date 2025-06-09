@@ -4,13 +4,9 @@ from ollama import ResponseError
 
 from app.data.connection import Database
 from app.data.db import get_db
-from app.data.questions import get_closest_questions
 from app.llms.chat import handle_agent_chat, handle_regular_chat
-from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
-from app.llms.prompts import (
-    build_context,
-)
+from app.llms.rerank import RetrievalError, get_retrieved_context
 from app.schemas.chat import ChatSchema
 
 db_dep = Depends(get_db)
@@ -65,28 +61,36 @@ async def chat(
     db: Database = db_dep,
 ) -> StreamingResponse:
     try:
-        query_to_embed = f"пребарување: {payload.prompt}"
-        prompt_embedding = await generate_embeddings(
-            query_to_embed,
-            payload.embeddings_model,
+        context = await get_retrieved_context(
+            db=db,
+            query=payload.prompt,
+            embedding_model=payload.embeddings_model,
+            use_reranker=payload.rerank_documents,
         )
-        closest_questions = await get_closest_questions(
-            db,
-            prompt_embedding,
-            payload.embeddings_model,
-            limit=20,
-        )
-        context = build_context(closest_questions)
+
+        if not context:
+            context = (
+                "Не можев да пронајдам релевантни информации во базата на податоци."
+            )
 
         if payload.use_agent:
             return await handle_agent_chat(payload, context)
-
         return await handle_regular_chat(payload, context)
 
+    except RetrievalError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Failed to retrieve or re-rank context for the query.",
+        ) from e
     except ResponseError as e:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="The LLM service is currently unavailable. Please try again later.",
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected internal server error occurred.",
         ) from e
 
 
