@@ -10,10 +10,16 @@ from app.utils.settings import Settings
 settings = Settings()
 
 
+class GpuApiError(Exception):
+    """
+    Custom exception for errors related to the GPU API service.
+    """
+
+
 async def generate_gpu_api_embeddings(
     text: str | list[str],
     model: Model,
-) -> list[float]:
+) -> list[float] | list[list[float]]:
     """
     Generate embeddings using the GPU API service.
     """
@@ -32,16 +38,21 @@ async def generate_gpu_api_embeddings(
                 headers={"Content-Type": "application/json"},
             )
 
-            if response.status_code != 200:
-                raise RuntimeError(f"GPU API embeddings error: {response.text}")
+            response.raise_for_status()
 
             result = response.json()
-            return result["embeddings"]
+            embeddings = result.get("embeddings")
 
+            return embeddings
+
+    except httpx.HTTPStatusError as e:
+        raise GpuApiError(
+            f"GPU API returned an error: {e.response.status_code} - {e.response.text}",
+        ) from e
     except httpx.RequestError as e:
-        raise RuntimeError(f"Connection error to GPU API: {e}")
+        raise GpuApiError(f"Connection error to GPU API: {e}") from e
     except Exception as e:
-        raise RuntimeError(f"Unexpected error calling GPU API: {e}")
+        raise GpuApiError(f"An unexpected error occurred calling GPU API: {e}") from e
 
 
 async def stream_gpu_api_response(
