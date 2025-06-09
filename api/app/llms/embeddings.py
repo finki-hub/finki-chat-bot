@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 
 from app.data.connection import Database
 from app.llms.google import generate_google_embeddings
+from app.llms.gpu_api import generate_gpu_api_embeddings
 from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.llms.ollama import generate_ollama_embeddings
 from app.llms.openai import generate_openai_embeddings
@@ -44,6 +45,9 @@ async def generate_embeddings(
 
         case Model.TEXT_EMBEDDING_004:
             return await generate_google_embeddings(text, model)
+
+        case Model.MULTILINGUAL_E5_LARGE:
+            return await generate_gpu_api_embeddings(text, model)
 
         case _:
             raise ValueError(f"Unsupported model: {model}")

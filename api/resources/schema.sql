@@ -51,3 +51,10 @@ ADD COLUMN IF NOT EXISTS embedding_text_embedding_004 vector (768);
 CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_004_idx ON question USING hnsw (
     embedding_text_embedding_004 vector_cosine_ops
 );
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_multilingual_e5_large vector (1024);
+
+CREATE INDEX IF NOT EXISTS question_embedding_multilingual_e5_large_idx ON question USING hnsw (
+    embedding_multilingual_e5_large vector_cosine_ops
+);

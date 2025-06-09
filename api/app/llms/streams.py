@@ -1,6 +1,7 @@
 from fastapi.responses import StreamingResponse
 
 from app.llms.google import stream_google_agent_response, stream_google_response
+from app.llms.gpu_api import stream_gpu_api_response
 from app.llms.models import Model
 from app.llms.ollama import stream_ollama_agent_response, stream_ollama_response
 from app.llms.openai import stream_openai_agent_response, stream_openai_response
@@ -23,7 +24,7 @@ async def stream_response(
             Model.LLAMA_3_3_70B
             | Model.MISTRAL
             | Model.DEEPSEEK_R1_70B
-            | Model.QWEN_2_5_72B
+            | Model.QWEN2_5_72B
             | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
             | Model.VEZILKALLM_GGUF
         ):
@@ -56,6 +57,16 @@ async def stream_response(
                 max_tokens=max_tokens,
             )
 
+        case Model.QWEN2_1_5_B_INSTRUCT:
+            return await stream_gpu_api_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+
         case _:
             raise ValueError(f"Unsupported model: {model}")
 
@@ -77,7 +88,7 @@ async def stream_response_with_agent(
             Model.LLAMA_3_3_70B
             | Model.MISTRAL
             | Model.DEEPSEEK_R1_70B
-            | Model.QWEN_2_5_72B
+            | Model.QWEN2_5_72B
             | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
             | Model.VEZILKALLM_GGUF
         ):
