@@ -1,3 +1,6 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -6,10 +9,18 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.embeddings import router as embeddings_router
 from app.api.health import router as health_router
+from app.api.rerank import router as rerank_router
 from app.api.streams import router as streams_router
+from app.llms.reranker import init_reranker
 from app.utils.settings import Settings
 
 settings = Settings()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
+    init_reranker()
+    yield
 
 
 def make_app(settings: Settings) -> FastAPI:
@@ -20,6 +31,7 @@ def make_app(settings: Settings) -> FastAPI:
         title=settings.APP_TITLE,
         description=settings.APP_DESCRIPTION,
         version=settings.API_VERSION,
+        lifespan=lifespan,
         openapi_tags=[
             {"name": "Embeddings", "description": "Manage embeddings"},
             {"name": "Health", "description": "Health check and API status"},
@@ -40,6 +52,7 @@ def make_app(settings: Settings) -> FastAPI:
 
     app.include_router(embeddings_router)
     app.include_router(streams_router)
+    app.include_router(rerank_router)
     app.include_router(health_router)
 
     @app.exception_handler(RequestValidationError)
