@@ -120,6 +120,9 @@ async def get_question_by_name(
         status.HTTP_400_BAD_REQUEST: {
             "description": "Question already exists or creation failed",
         },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid or missing API Key",
+        },
     },
     dependencies=[api_key_dep],
     operation_id="createQuestion",
@@ -153,6 +156,9 @@ async def create_question(
             "description": "No fields to update or update failed",
         },
         status.HTTP_404_NOT_FOUND: {"description": "Question not found"},
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid or missing API Key",
+        },
     },
     dependencies=[api_key_dep],
     operation_id="updateQuestion",
@@ -190,7 +196,10 @@ async def update_question(
     description="Delete the question, and return the deleted record.",
     response_model=QuestionSchema,
     status_code=status.HTTP_200_OK,
-    responses={status.HTTP_404_NOT_FOUND: {"description": "Question not found"}},
+    responses={
+        status.HTTP_404_NOT_FOUND: {"description": "Question not found"},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid or missing API Key"},
+    },
     dependencies=[api_key_dep],
     operation_id="deleteQuestion",
 )
@@ -238,7 +247,10 @@ async def get_nth_question(
     response_class=StreamingResponse,
     status_code=status.HTTP_200_OK,
     operation_id="fillEmbeddings",
-    responses={status.HTTP_400_BAD_REQUEST: {"description": "Unsupported model"}},
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Unsupported model"},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid or missing API Key"},
+    },
     dependencies=[api_key_dep],
 )
 async def fill_embeddings(
