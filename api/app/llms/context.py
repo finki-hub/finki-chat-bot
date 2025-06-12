@@ -4,13 +4,16 @@ from app.data.connection import Database
 from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
+from app.llms.query_transform import transform_query
 from app.utils.settings import Settings
 
 settings = Settings()
 
 
 class RetrievalError(Exception):
-    """Custom exception for retrieval or re-ranking failures."""
+    """
+    Custom exception for retrieval or re-ranking failures.
+    """
 
 
 async def get_retrieved_context(
@@ -19,19 +22,30 @@ async def get_retrieved_context(
     embedding_model: Model,
     *,
     use_reranker: bool,
-    initial_k: int = 20,
-    top_k: int = 5,
+    initial_k: int = 30,
+    top_k: int = 10,
 ) -> str:
     """
     Performs a retrieval process. If use_reranker is True, it's a two-stage
     process (vector search + re-ranking). Otherwise, it's a single-stage
     vector search.
     """
-    print(
-        f"Starting retrieval for query: '{query[:50]}...'. Reranker enabled: {use_reranker}",
+
+    print(f"Transforming query: '{query[:100]}...'")
+
+    query = await transform_query(
+        query,
+        Model.GPT_4_1_MINI,
+        temperature=0.0,
+        top_p=1.0,
+        max_tokens=512,
     )
 
+    print(f"Transformed query: '{query[:100]}...'")
+
     retrieval_limit = initial_k if use_reranker else top_k
+
+    print(f"Reranking: {use_reranker}")
 
     try:
         query_to_embed = f"пребарување: {query}"

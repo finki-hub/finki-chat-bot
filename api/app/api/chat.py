@@ -6,7 +6,7 @@ from app.data.connection import Database
 from app.data.db import get_db
 from app.llms.chat import handle_agent_chat, handle_regular_chat
 from app.llms.models import Model
-from app.llms.rerank import RetrievalError, get_retrieved_context
+from api.app.llms.context import RetrievalError, get_retrieved_context
 from app.schemas.chat import ChatSchema
 
 db_dep = Depends(get_db)

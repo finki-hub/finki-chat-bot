@@ -189,3 +189,27 @@ async def stream_openai_agent_response(
             top_p=top_p,
             max_tokens=max_tokens,
         )
+
+
+async def transform_query_with_openai(
+    query: str,
+    model: Model,
+    *,
+    system_prompt: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+) -> str:
+    try:
+        llm = get_openai_llm(model, temperature, top_p, max_tokens)
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": query},
+        ]
+
+        response = await llm.ainvoke(messages)
+        return response.content.strip()  # type: ignore[union-attr]
+    except Exception as e:
+        print(f"Query transformation failed: {e}. Using original query.")
+        return query
