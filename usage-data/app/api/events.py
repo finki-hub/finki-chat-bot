@@ -5,6 +5,8 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Path,
+    Query,
     status,
 )
 
@@ -65,3 +67,68 @@ async def ingest_event(
         event_id=event.event_id,
         inserted_id=str(result.inserted_id),
     )
+
+
+@router.get(
+    "/{event_type}/",
+    summary="List usage events",
+    description=(
+        "Return events of type `event_type` with optional filtering "
+        "by timestamp. Results are sorted newest first."
+    ),
+    response_model=list[UsageEvent],
+    status_code=status.HTTP_200_OK,
+    response_description="A page of matching usage events",
+    operation_id="listUsageEvents",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "No such event_type collection exists",
+        },
+    },
+)
+async def list_events(
+    event_type: str = Path(
+        description="Name of the event_type / MongoDB collection",
+    ),
+    start_time: datetime | None = Query(  # noqa: B008
+        None,
+        description="Only events on or after this ISO timestamp",
+    ),
+    end_time: datetime | None = Query(  # noqa: B008
+        None,
+        description="Only events on or before this ISO timestamp",
+    ),
+    skip: int = Query(
+        0,
+        ge=0,
+        description="Number of events to skip (offset for pagination)",
+    ),
+    limit: int = Query(
+        100,
+        ge=1,
+        le=10000,
+        description="Max number of events to return (capped at 10 000)",
+    ),
+    db: Database = db_dep,
+) -> list[UsageEvent]:
+    coll = db.get_collection(event_type)
+
+    query: dict = {}
+    if start_time or end_time:
+        ts_filter: dict = {}
+        if start_time:
+            ts_filter["$gte"] = start_time
+        if end_time:
+            ts_filter["$lte"] = end_time
+        query["timestamp"] = ts_filter
+
+    if event_type not in await db.db.list_collection_names():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No events of type '{event_type}' found",
+        )
+
+    cursor = coll.find(query, {"_id": 0}).sort("timestamp", -1).skip(skip).limit(limit)
+    events = await cursor.to_list(length=limit)
+
+    return events
