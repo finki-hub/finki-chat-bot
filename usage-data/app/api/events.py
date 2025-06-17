@@ -13,6 +13,7 @@ from fastapi import (
 from app.data.connection import Database
 from app.data.db import get_db
 from app.schemas.events import IngestResponse, UsageEvent
+from app.utils.auth import verify_api_key
 
 db_dep = Depends(get_db)
 
@@ -39,7 +40,11 @@ router = APIRouter(
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid payload or database insertion error",
         },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid or missing API Key",
+        },
     },
+    dependencies=[Depends(verify_api_key)],
 )
 async def ingest_event(
     event: UsageEvent,

@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     MONGO_URL: str = "mongodb://mongo:27017"
 
+    API_KEY: str = "your_api_key_here"
+
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]
 

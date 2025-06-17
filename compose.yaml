@@ -118,6 +118,7 @@ services:
     ports:
       - '8088:8088'
     environment:
+      API_KEY: ${API_KEY}
       MONGO_URL: ${MONGO_URL}
     depends_on:
       mongo:
