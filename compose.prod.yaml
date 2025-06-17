@@ -60,6 +60,39 @@ services:
     user: '0:0'
     restart: unless-stopped
 
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongo-data:/data/db
+    networks:
+      - finki_stack
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  usage-data:
+    image: ghcr.io/finki-hub/finki-chat-bot-usage-data:latest
+    ports:
+      - '8088:8088'
+    environment:
+      MONGO_URI: 'mongodb://mongo:27017'
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - finki_stack
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fs http://127.0.0.1:3001/health/ || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 networks:
   finki_stack:
     name: finki_stack
