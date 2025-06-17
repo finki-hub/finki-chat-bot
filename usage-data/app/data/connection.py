@@ -8,7 +8,7 @@ class Database:
         """
         self.dsn = dsn
 
-    async def init(self) -> None:
+    def init(self) -> None:
         """
         Connect to Mongo and pick a hard-coded DB name.
         Collections are created on-the-fly by name.
@@ -23,7 +23,7 @@ class Database:
         """
         return self.db[name]
 
-    async def disconnect(self) -> None:
+    def disconnect(self) -> None:
         """
         Close the database connection.
         """

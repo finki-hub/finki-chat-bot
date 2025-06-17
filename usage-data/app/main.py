@@ -17,11 +17,11 @@ settings = Settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    db = Database(dsn=settings.MONGO_URI)
+    db = Database(dsn=settings.MONGO_URL)
     app.state.db = db
-    await db.init()
+    db.init()
     yield
-    await db.disconnect()
+    db.disconnect()
 
 
 def make_app(settings: Settings) -> FastAPI:
