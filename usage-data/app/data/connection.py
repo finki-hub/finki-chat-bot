@@ -13,7 +13,7 @@ class Database:
         Connect to Mongo and pick a hard-coded DB name.
         Collections are created on-the-fly by name.
         """
-        self.client = AsyncIOMotorClient(self.dsn)
+        self.client: AsyncIOMotorClient = AsyncIOMotorClient(self.dsn)
         self.db = self.client["usage_data"]
 
     def get_collection(self, name: str) -> AsyncIOMotorCollection:
