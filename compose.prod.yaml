@@ -63,8 +63,6 @@ services:
   mongo:
     image: mongo:8
     restart: unless-stopped
-    ports:
-      - '27017:27017'
     volumes:
       - ./mongo-data:/data/db
     networks:
@@ -74,22 +72,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  mongo-express:
-    image: mongo-express:latest
-    restart: unless-stopped
-    ports:
-      - '8082:8081'
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ADMIN_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ADMIN_PASSWORD}
-    networks:
-      - finki_stack
-    depends_on:
-      mongo:
-        condition: service_healthy
 
   usage-data:
     image: ghcr.io/finki-hub/finki-chat-bot-usage-data:latest
