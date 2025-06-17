@@ -86,11 +86,6 @@ services:
     networks:
       - finki_stack
     restart: unless-stopped
-    healthcheck:
-      test: ['CMD-SHELL', 'curl -fs http://127.0.0.1:3001/health/ || exit 1']
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
 networks:
   finki_stack:
