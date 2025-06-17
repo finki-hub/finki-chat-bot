@@ -95,6 +95,22 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo-express:
+    image: mongo-express:latest
+    restart: unless-stopped
+    ports:
+      - '8082:8081'
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: secret
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - finki_stack_dev
+
   usage-data:
     build:
       context: ./usage-data
@@ -102,7 +118,7 @@ services:
     ports:
       - '8088:8088'
     environment:
-      MONGO_URI: 'mongodb://mongo:27017'
+      MONGO_URL: ${MONGO_URL}
     depends_on:
       mongo:
         condition: service_healthy

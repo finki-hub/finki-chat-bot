@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     APP_DESCRIPTION: str = "Ingest arbitrary usage events for analytics"
     API_VERSION: str = "0.1.0"
 
-    MONGO_URI: str = "mongodb://mongo:27017"
+    MONGO_URL: str = "mongodb://mongo:27017"
 
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]
