@@ -11,3 +11,6 @@ scripts/*.sql
 
 # HuggingFace
 hf_cache/
+
+## MongoDB
+mongo-data/
