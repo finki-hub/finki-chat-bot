@@ -33,7 +33,7 @@ The API will be running on port `8880`. This also brings up a `pgAdmin` instance
 Requires Python >= 3.13 and [`uv`](https://github.com/astral-sh/uv).
 
 1. Clone the repository: `git clone https://github.com/finki-hub/finki-chat-bot.git`
-2. Install dependencies: `cd api && uv sync`
+2. Install dependencies: in each directory (`api`, `gpu-api` and `content-api`), run `uv sync`
 3. Prepare env. variables by copying `env.sample` to `.env` - minimum setup requires the database configuration, it can be left as is
 4. Run it: `docker compose up -d`
 
