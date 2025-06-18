@@ -60,19 +60,6 @@ services:
     user: '0:0'
     restart: unless-stopped
 
-  mongo:
-    image: mongo:8
-    restart: unless-stopped
-    volumes:
-      - ./mongo-data:/data/db
-    networks:
-      - finki_stack
-    healthcheck:
-      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
 networks:
   finki_stack:
     name: finki_stack
