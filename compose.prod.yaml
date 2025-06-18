@@ -73,20 +73,6 @@ services:
       timeout: 5s
       retries: 5
 
-  usage-data:
-    image: ghcr.io/finki-hub/finki-chat-bot-usage-data:latest
-    ports:
-      - '8088:8088'
-    environment:
-      API_KEY: ${API_KEY}
-      MONGO_URL: ${MONGO_URL}
-    depends_on:
-      mongo:
-        condition: service_healthy
-    networks:
-      - finki_stack
-    restart: unless-stopped
-
 networks:
   finki_stack:
     name: finki_stack
