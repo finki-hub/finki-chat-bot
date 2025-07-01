@@ -20,14 +20,6 @@ services:
       - finki_stack
     restart: unless-stopped
 
-  content-api:
-    image: ghcr.io/finki-hub/finki-chat-bot-content-api:latest
-    ports:
-      - '8808:8808'
-    networks:
-      - finki_stack_dev
-    restart: unless-stopped
-
   db:
     image: pgvector/pgvector:pg17
     environment:

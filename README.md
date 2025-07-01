@@ -10,8 +10,7 @@ This project comes as a monorepo of microservices:
 
 - API ([`/api`](/api)) for managing documents, links and chatting (default port: 8880)
 - GPU API ([`/gpu-api`](/gpu-api)) for locally executing GPU accelerated tasks like embeddings generation (default port: 8888)
-- Content API ([`/content-api`](/content-api/)) for providing external data for RAG using MCP (default port: 8808)
-- Front end (WIP)
+- Front-end (WIP)
 - Database (PostgreSQL + pgvector) for keeping documents and embeddings
 
 The API service is packaged into a Docker image ([`ghcr.io/finki-hub/finki-chat-bot`](https://github.com/finki-hub/finki-chat-bot/pkgs/container/finki-chat-bot)), while the GPU API service is not automatically Dockerized because it contains PyTorch. However, it comes with a `Dockerfile` so it can be built locally if necessary.
@@ -33,7 +32,7 @@ The API will be running on port `8880`. This also brings up a `pgAdmin` instance
 Requires Python >= 3.13 and [`uv`](https://github.com/astral-sh/uv).
 
 1. Clone the repository: `git clone https://github.com/finki-hub/finki-chat-bot.git`
-2. Install dependencies: in each directory (`api`, `gpu-api` and `content-api`), run `uv sync`
+2. Install dependencies: in each directory (`api` and `gpu-api`), run `uv sync`
 3. Prepare env. variables by copying `env.sample` to `.env` - minimum setup requires the database configuration, it can be left as is
 4. Run it: `docker compose up -d`
 
