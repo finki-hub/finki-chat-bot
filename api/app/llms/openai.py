@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langgraph.prebuilt import create_react_agent
 from pydantic import SecretStr
 
-from app.llms.mcp import get_mcp_client
+from app.llms.mcp import build_mcp_client
 from app.llms.models import Model
 from app.llms.prompts import stitch_system_user
 from app.utils.settings import Settings
@@ -137,7 +137,7 @@ async def stream_openai_agent_response(
     try:
         llm = get_openai_llm(model, temperature, top_p, max_tokens)
 
-        client = await get_mcp_client()
+        client = build_mcp_client()
         tools = await client.get_tools()
 
         if not tools:

@@ -14,7 +14,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GPU_API_URL: ${GPU_API_URL}
-      CONTENT_API_URL: ${CONTENT_API_URL}
+      MCP_URLS: ${MCP_URLS}
     depends_on:
       db:
         condition: service_healthy

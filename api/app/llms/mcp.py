@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from langchain_mcp_adapters.client import (  # type: ignore[import-untyped]
+    Connection,
     MultiServerMCPClient,
     StreamableHttpConnection,
 )
@@ -12,26 +13,37 @@ settings = Settings()
 _mcp_client: MultiServerMCPClient | None = None
 
 
-async def get_mcp_client() -> MultiServerMCPClient:
+def build_mcp_client() -> MultiServerMCPClient:
     """
-    Return a singleton MultiServerMCPClient instance for the content API.
-    If the client is not already created, it initializes a new one with the content API URL.
+    Return a singleton MultiServerMCPClient instance.
+    If the client is not already created, it initializes a new one.
+    The client is configured for all provided MCP servers.
     """
     global _mcp_client  # noqa: PLW0603
 
     if _mcp_client is not None:
         return _mcp_client
 
-    connection: StreamableHttpConnection = {
-        "url": settings.CONTENT_API_URL,
-        "transport": "streamable_http",
-        "headers": None,
-        "timeout": timedelta(seconds=30),
-        "sse_read_timeout": timedelta(seconds=60),
-        "terminate_on_close": True,
-        "session_kwargs": None,
-        "httpx_client_factory": None,
-    }
+    connections: dict[str, Connection] = {}
 
-    _mcp_client = MultiServerMCPClient(connections={"content-api": connection})
+    mcp_urls = settings.MCP_URLS.split(",") if settings.MCP_URLS else []
+
+    for url in mcp_urls:
+        connection: StreamableHttpConnection = {
+            "url": url,
+            "transport": "streamable_http",
+            "headers": None,
+            "timeout": timedelta(seconds=30),
+            "sse_read_timeout": timedelta(seconds=60),
+            "terminate_on_close": True,
+            "session_kwargs": None,
+            "httpx_client_factory": None,
+        }
+        connections[url] = connection
+
+    print(
+        f"Building MCP client with {len(connections)} connections: {list(connections.keys())}",
+    )
+
+    _mcp_client = MultiServerMCPClient(connections=connections)
     return _mcp_client
