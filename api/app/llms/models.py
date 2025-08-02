@@ -34,3 +34,9 @@ MODEL_EMBEDDINGS_COLUMNS: dict[Model, str] = {
     Model.TEXT_EMBEDDING_004: "embedding_text_embedding_004",
     Model.MULTILINGUAL_E5_LARGE: "embedding_multilingual_e5_large",
 }
+
+GPU_API_MODELS: dict[Model, str] = {
+    Model.BGE_M3: "BAAI/bge-m3",
+    Model.MULTILINGUAL_E5_LARGE: "intfloat/multilingual-e5-large",
+    Model.QWEN2_1_5_B_INSTRUCT: "Qwen/Qwen2-1.5B-Instruct",
+}

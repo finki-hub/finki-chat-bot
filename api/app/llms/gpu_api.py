@@ -4,7 +4,7 @@ from collections.abc import AsyncGenerator
 import httpx
 from fastapi.responses import StreamingResponse
 
-from app.llms.models import Model
+from app.llms.models import GPU_API_MODELS, Model
 from app.utils.settings import Settings
 
 settings = Settings()
@@ -27,7 +27,7 @@ async def generate_gpu_api_embeddings(
 
     payload = {
         "input": text,
-        "embeddings_model": model.value,
+        "embeddings_model": GPU_API_MODELS[model],
     }
 
     try:
