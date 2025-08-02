@@ -24,6 +24,7 @@ class Model(Enum):
     VEZILKALLM_GGUF = "hf.co/mradermacher/VezilkaLLM-GGUF:Q8_0"
 
     MULTILINGUAL_E5_LARGE = "intfloat/multilingual-e5-large"
+    BGE_M3_LOCAL = "BAAI/bge-m3"
     QWEN2_1_5_B_INSTRUCT = "Qwen/Qwen2-1.5B-Instruct"
 
 
@@ -36,7 +37,7 @@ MODEL_EMBEDDINGS_COLUMNS: dict[Model, str] = {
 }
 
 GPU_API_MODELS: dict[Model, str] = {
-    Model.BGE_M3: "BAAI/bge-m3",
+    Model.BGE_M3_LOCAL: "BAAI/bge-m3",
     Model.MULTILINGUAL_E5_LARGE: "intfloat/multilingual-e5-large",
     Model.QWEN2_1_5_B_INSTRUCT: "Qwen/Qwen2-1.5B-Instruct",
 }

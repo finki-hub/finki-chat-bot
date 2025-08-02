@@ -46,7 +46,7 @@ async def generate_embeddings(
         case Model.TEXT_EMBEDDING_004:
             return await generate_google_embeddings(text, model)
 
-        case Model.MULTILINGUAL_E5_LARGE:
+        case Model.MULTILINGUAL_E5_LARGE | Model.BGE_M3_LOCAL:
             return await generate_gpu_api_embeddings(text, model)
 
         case _:
