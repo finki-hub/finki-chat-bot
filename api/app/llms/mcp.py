@@ -1,8 +1,7 @@
-from datetime import timedelta
-
 from langchain_mcp_adapters.client import (  # type: ignore[import-untyped]
     Connection,
     MultiServerMCPClient,
+    SSEConnection,
     StreamableHttpConnection,
 )
 
@@ -26,24 +25,29 @@ def build_mcp_client() -> MultiServerMCPClient:
 
     connections: dict[str, Connection] = {}
 
-    mcp_urls = settings.MCP_URLS.split(",") if settings.MCP_URLS else []
+    mcp_http_urls = settings.MCP_HTTP_URLS.split(",") if settings.MCP_HTTP_URLS else []
+    mcp_sse_urls = settings.MCP_SSE_URLS.split(",") if settings.MCP_SSE_URLS else []
 
-    for url in mcp_urls:
-        connection: StreamableHttpConnection = {
+    for url in mcp_http_urls:
+        print(f"Adding Streamable HTTP connection to MCP client: {url}")
+        streamable_connection: StreamableHttpConnection = {
             "url": url,
             "transport": "streamable_http",
-            "headers": None,
-            "timeout": timedelta(seconds=30),
-            "sse_read_timeout": timedelta(seconds=60),
-            "terminate_on_close": True,
-            "session_kwargs": None,
-            "httpx_client_factory": None,
         }
-        connections[url] = connection
+        connections[url] = streamable_connection
+
+    for url in mcp_sse_urls:
+        print(f"Adding SSE connection to MCP client: {url}")
+        sse_connection: SSEConnection = {
+            "url": url,
+            "transport": "sse",
+        }
+        connections[url] = sse_connection
 
     print(
         f"Building MCP client with {len(connections)} connections: {list(connections.keys())}",
     )
 
     _mcp_client = MultiServerMCPClient(connections=connections)
+
     return _mcp_client
