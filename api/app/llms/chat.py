@@ -22,8 +22,8 @@ async def handle_regular_chat(
     Handle regular chat without MCP tools.
     """
     logger.info(
-        "Handling regular chat for user prompt: '%s' with model: %s",
-        payload.prompt,
+        "Handling regular chat for user prompt length: '%d' with model: %s",
+        len(payload.prompt),
         payload.inference_model.value,
     )
 
@@ -48,8 +48,8 @@ async def handle_agent_chat(
     Handle chat with MCP tools using an agent.
     """
     logger.info(
-        "Handling agent chat for user prompt: '%s' with model: %s",
-        payload.prompt,
+        "Handling agent chat for user prompt length: '%d' with model: %s",
+        len(payload.prompt),
         payload.inference_model.value,
     )
 

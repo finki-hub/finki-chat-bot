@@ -111,8 +111,8 @@ async def stream_ollama_response(
     The response is formatted as Server-Sent Events (SSE) for real-time updates.
     """
     logger.info(
-        "Streaming Ollama response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming Ollama response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 
@@ -154,8 +154,8 @@ async def stream_ollama_agent_response(
     Falls back to regular response if MCP unavailable.
     """
     logger.info(
-        "Streaming Ollama agent response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming Ollama agent response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 

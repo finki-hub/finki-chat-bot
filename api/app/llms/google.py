@@ -114,8 +114,8 @@ async def stream_google_response(
     This function is a direct parallel to stream_openai_response.
     """
     logger.info(
-        "Streaming Google response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming Google response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 
@@ -161,8 +161,8 @@ async def stream_google_agent_response(
     Falls back to regular response if MCP unavailable.
     """
     logger.info(
-        "Streaming Google agent response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming Google agent response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 

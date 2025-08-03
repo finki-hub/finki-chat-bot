@@ -73,8 +73,8 @@ async def stream_qwen2_response(
     Streams a response from the Qwen2-1.5B model using the specified parameters.
     """
     logger.info(
-        "Streaming Qwen2-1.5B response for user prompt: %s",
-        user_prompt,
+        "Streaming Qwen2-1.5B response for user prompt length: %d",
+        len(user_prompt),
     )
 
     llm = get_qwen2_pipeline(temperature, top_p, max_tokens)

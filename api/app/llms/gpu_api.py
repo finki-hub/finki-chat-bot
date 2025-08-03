@@ -75,8 +75,8 @@ async def stream_gpu_api_response(
     Stream a response from the GPU API service.
     """
     logger.info(
-        "Streaming GPU API response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming GPU API response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 

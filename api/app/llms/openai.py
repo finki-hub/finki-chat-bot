@@ -113,8 +113,8 @@ async def stream_openai_response(
     The response is formatted as Server-Sent Events (SSE) for real-time updates.
     """
     logger.info(
-        "Streaming OpenAI response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming OpenAI response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 
@@ -157,8 +157,8 @@ async def stream_openai_agent_response(
     Falls back to regular response if MCP unavailable.
     """
     logger.info(
-        "Streaming OpenAI agent response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming OpenAI agent response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 

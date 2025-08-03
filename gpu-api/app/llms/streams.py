@@ -28,9 +28,9 @@ async def stream_response(
     in a Server-Sent Events (SSE) response.
     """
     logger.info(
-        "Received streaming request for model %s with user prompt: %s",
+        "Received streaming request for model %s with user prompt length: %d",
         model.value,
-        user_prompt,
+        len(user_prompt),
     )
 
     streamer = streamers.get(model)

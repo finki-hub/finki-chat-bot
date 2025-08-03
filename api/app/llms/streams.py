@@ -24,8 +24,8 @@ async def stream_response(
     Stream a response from the specified model using the provided user prompt and system prompt.
     """
     logger.info(
-        "Streaming response for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming response for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 
@@ -94,8 +94,8 @@ async def stream_response_with_agent(
     Stream a response from the specified model using the provided user prompt and system prompt with agent.
     """
     logger.info(
-        "Streaming response with agent for user prompt: '%s' with model: %s",
-        user_prompt,
+        "Streaming response with agent for user prompt length: '%d' with model: %s",
+        len(user_prompt),
         model.value,
     )
 
