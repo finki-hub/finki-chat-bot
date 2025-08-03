@@ -3,13 +3,11 @@ import logging
 import torch
 from sentence_transformers import CrossEncoder
 
+from app.utils.exceptions import ModelNotReadyError
+
 logger = logging.getLogger(__name__)
 
 _reranker_model: CrossEncoder | None = None
-
-
-class RerankerNotInitializedError(Exception):
-    """Custom exception raised when the reranker model is not initialized."""
 
 
 def init_reranker() -> None:
@@ -45,7 +43,7 @@ def rerank_documents(query: str, documents: list[str]) -> list[str]:
     if not documents or not query:
         return documents
     if _reranker_model is None:
-        raise RerankerNotInitializedError
+        raise ModelNotReadyError
 
     model_inputs = [[query, doc] for doc in documents]
 

@@ -11,6 +11,7 @@ from app.llms.chat import handle_agent_chat, handle_regular_chat
 from app.llms.context import RetrievalError, get_retrieved_context
 from app.llms.models import Model
 from app.schemas.chat import ChatSchema
+from app.utils.exceptions import ModelNotReadyError
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,16 @@ router = APIRouter(
                 },
             },
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Model not ready or retrieval error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "The model is not ready. Please try again later.",
+                    },
+                },
+            },
+        },
     },
     operation_id="chatWithModel",
 )
@@ -87,6 +98,13 @@ async def chat(
             return await handle_agent_chat(payload, context)
         return await handle_regular_chat(payload, context)
 
+    except ModelNotReadyError as e:
+        logger.exception("Model not ready for chat request: %s")
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The model is not ready. Please try again later.",
+        ) from e
     except RetrievalError as e:
         logger.exception(
             "Error retrieving or re-ranking context for query '%s'",

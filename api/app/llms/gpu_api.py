@@ -6,17 +6,12 @@ import httpx
 from fastapi.responses import StreamingResponse
 
 from app.llms.models import GPU_API_MODELS, Model
+from app.utils.exceptions import GpuApiError, ModelNotReadyError
 from app.utils.settings import Settings
 
 logger = logging.getLogger(__name__)
 
 settings = Settings()
-
-
-class GpuApiError(Exception):
-    """
-    Custom exception for errors related to the GPU API service.
-    """
 
 
 async def generate_gpu_api_embeddings(
@@ -55,6 +50,9 @@ async def generate_gpu_api_embeddings(
             return embeddings
 
     except httpx.HTTPStatusError as e:
+        if e.response.status_code == 503:
+            raise ModelNotReadyError from e
+
         raise GpuApiError(
             f"GPU API returned an error: {e.response.status_code} - {e.response.text}",
         ) from e

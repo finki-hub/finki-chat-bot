@@ -3,8 +3,9 @@ import logging
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.llms.reranker import RerankerNotInitializedError, rerank_documents
+from app.llms.reranker import rerank_documents
 from app.schemas.rerank import RerankRequestSchema, RerankResponseSchema
+from app.utils.exceptions import ModelNotReadyError
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ async def handle_rerank(payload: RerankRequestSchema) -> RerankResponseSchema:
         )
 
         return RerankResponseSchema(reranked_documents=reranked_list)
-    except RerankerNotInitializedError as e:
+    except ModelNotReadyError as e:
         logger.exception("Reranker model has not been initialized.")
 
         raise HTTPException(

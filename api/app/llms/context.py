@@ -7,17 +7,12 @@ from app.data.questions import get_closest_questions
 from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
 from app.llms.query_transform import transform_query
+from app.utils.exceptions import RetrievalError
 from app.utils.settings import Settings
 
 logger = logging.getLogger(__name__)
 
 settings = Settings()
-
-
-class RetrievalError(Exception):
-    """
-    Custom exception for retrieval or re-ranking failures.
-    """
 
 
 async def get_retrieved_context(
