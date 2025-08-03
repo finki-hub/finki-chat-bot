@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from httpx import HTTPStatusError
 from ollama import ResponseError
 
 from app.data.connection import Database
@@ -95,6 +96,19 @@ async def chat(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Failed to retrieve or re-rank context for the query.",
+        ) from e
+    except HTTPStatusError as e:
+        logger.exception(
+            "HTTP error occurred while processing the chat request: %s",
+            e.response.text,
+        )
+
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=e.response.json().get(
+                "detail",
+                "An error occurred while processing the request.",
+            ),
         ) from e
     except ResponseError as e:
         logger.exception(
