@@ -1,9 +1,12 @@
 import asyncio
+import logging
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.llms.reranker import rerank_documents
+from app.llms.reranker import RerankerNotInitializedError, rerank_documents
 from app.schemas.rerank import RerankRequestSchema, RerankResponseSchema
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/rerank",
@@ -33,21 +36,34 @@ router = APIRouter(
     },
 )
 async def handle_rerank(payload: RerankRequestSchema) -> RerankResponseSchema:
-    """
-    Accepts a query and a list of documents, and returns them re-ordered
-    by their semantic relevance to the query.
-    """
+    logger.info(
+        "Received rerank request with query: %s and %d documents",
+        payload.query,
+        len(payload.documents),
+    )
+
     if not payload.documents:
         return RerankResponseSchema(reranked_documents=[])
+
     try:
         reranked_list = await asyncio.to_thread(
             rerank_documents,
             payload.query,
             payload.documents,
         )
+
         return RerankResponseSchema(reranked_documents=reranked_list)
+    except RerankerNotInitializedError as e:
+        logger.exception("Reranker model has not been initialized.")
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Reranker model has not been initialized.",
+        ) from e
     except Exception as e:
+        logger.exception("Error during reranking documents")
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred during the re-ranking process.",
+            detail="An unexpected error occurred during the reranking process.",
         ) from e

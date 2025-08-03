@@ -1,3 +1,5 @@
+import logging
+
 from fastapi.responses import StreamingResponse
 
 from app.llms.prompts import (
@@ -9,6 +11,8 @@ from app.llms.prompts import (
 from app.llms.streams import stream_response, stream_response_with_agent
 from app.schemas.chat import ChatSchema
 
+logger = logging.getLogger(__name__)
+
 
 async def handle_regular_chat(
     payload: ChatSchema,
@@ -17,6 +21,12 @@ async def handle_regular_chat(
     """
     Handle regular chat without MCP tools.
     """
+    logger.info(
+        "Handling regular chat for user prompt: '%s' with model: %s",
+        payload.prompt,
+        payload.inference_model.value,
+    )
+
     system_prompt = payload.system_prompt or DEFAULT_SYSTEM_PROMPT
     user_prompt = build_user_prompt(context, payload.prompt)
 
@@ -37,6 +47,12 @@ async def handle_agent_chat(
     """
     Handle chat with MCP tools using an agent.
     """
+    logger.info(
+        "Handling agent chat for user prompt: '%s' with model: %s",
+        payload.prompt,
+        payload.inference_model.value,
+    )
+
     system_prompt = payload.system_prompt or DEFAULT_AGENT_SYSTEM_PROMPT
     user_prompt = build_user_agent_prompt(context, payload.prompt)
 

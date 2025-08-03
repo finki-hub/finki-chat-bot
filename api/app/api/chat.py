@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from ollama import ResponseError
@@ -8,6 +10,8 @@ from app.llms.chat import handle_agent_chat, handle_regular_chat
 from app.llms.context import RetrievalError, get_retrieved_context
 from app.llms.models import Model
 from app.schemas.chat import ChatSchema
+
+logger = logging.getLogger(__name__)
 
 db_dep = Depends(get_db)
 
@@ -60,6 +64,11 @@ async def chat(
     payload: ChatSchema,
     db: Database = db_dep,
 ) -> StreamingResponse:
+    logger.info(
+        "Received chat request with payload: %s",
+        payload.model_dump(mode="json", exclude_defaults=True),
+    )
+
     try:
         context = await get_retrieved_context(
             db=db,
@@ -78,16 +87,29 @@ async def chat(
         return await handle_regular_chat(payload, context)
 
     except RetrievalError as e:
+        logger.exception(
+            "Error retrieving or re-ranking context for query '%s'",
+            payload.prompt,
+        )
+
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Failed to retrieve or re-rank context for the query.",
         ) from e
     except ResponseError as e:
+        logger.exception(
+            "Error communicating with the LLM service",
+        )
+
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="The LLM service is currently unavailable. Please try again later.",
         ) from e
     except Exception as e:
+        logger.exception(
+            "An unexpected error occurred while processing the chat request",
+        )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected internal server error occurred.",

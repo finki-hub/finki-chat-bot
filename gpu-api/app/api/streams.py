@@ -1,8 +1,12 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.llms.streams import stream_response
 from app.schemas.streams import StreamRequestSchema
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/stream",
@@ -33,6 +37,12 @@ async def stream(
     request: Request,
     payload: StreamRequestSchema,
 ) -> StreamingResponse | JSONResponse:
+    logger.info(
+        "Received stream request with prompt: %s, model: %s",
+        payload.prompt,
+        payload.inference_model,
+    )
+
     system_prompt = (
         payload.system_prompt
         or "Ти си љубезен асистент кој помага на корисникот со неговите прашања."

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     APP_DESCRIPTION: str = "API for FINKI Chat Bot, providing GPU-accelerated embeddings and chat capabilities."
     API_VERSION: str = "1.0.0"
 
+    LOG_LEVEL: str = "INFO"
+
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]
 

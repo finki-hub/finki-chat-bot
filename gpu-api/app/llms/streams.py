@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 
 from fastapi import HTTPException, status
@@ -6,7 +7,9 @@ from fastapi.responses import StreamingResponse
 from app.llms.models import Model
 from app.llms.qwen2_1_5_b_instruct import stream_qwen2_response
 
-_streamer_map = {
+logger = logging.getLogger(__name__)
+
+streamers = {
     Model.QWEN2_1_5_B_INSTRUCT: stream_qwen2_response,
 }
 
@@ -24,7 +27,14 @@ async def stream_response(
     Dispatches to the appropriate model streamer and wraps the output
     in a Server-Sent Events (SSE) response.
     """
-    streamer = _streamer_map.get(model)
+    logger.info(
+        "Received streaming request for model %s with user prompt: %s",
+        model.value,
+        user_prompt,
+    )
+
+    streamer = streamers.get(model)
+
     if streamer is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

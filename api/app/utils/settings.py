@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     )
     API_VERSION: str = "1.0.0"
 
+    LOG_LEVEL: str = "INFO"
+
     GPU_API_URL: str = "http://gpu-api:8888"
     MCP_HTTP_URLS: str = ""
     MCP_SSE_URLS: str = ""

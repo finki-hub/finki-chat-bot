@@ -1,3 +1,5 @@
+import logging
+
 from fastapi.responses import StreamingResponse
 
 from app.llms.google import stream_google_agent_response, stream_google_response
@@ -5,6 +7,8 @@ from app.llms.gpu_api import stream_gpu_api_response
 from app.llms.models import Model
 from app.llms.ollama import stream_ollama_agent_response, stream_ollama_response
 from app.llms.openai import stream_openai_agent_response, stream_openai_response
+
+logger = logging.getLogger(__name__)
 
 
 async def stream_response(
@@ -19,6 +23,12 @@ async def stream_response(
     """
     Stream a response from the specified model using the provided user prompt and system prompt.
     """
+    logger.info(
+        "Streaming response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     match model:
         case (
             Model.LLAMA_3_3_70B
@@ -83,6 +93,12 @@ async def stream_response_with_agent(
     """
     Stream a response from the specified model using the provided user prompt and system prompt with agent.
     """
+    logger.info(
+        "Streaming response with agent for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     match model:
         case (
             Model.LLAMA_3_3_70B

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncGenerator
 
 import httpx
@@ -6,6 +7,8 @@ from fastapi.responses import StreamingResponse
 
 from app.llms.models import GPU_API_MODELS, Model
 from app.utils.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 settings = Settings()
 
@@ -23,6 +26,12 @@ async def generate_gpu_api_embeddings(
     """
     Generate embeddings using the GPU API service.
     """
+    logger.info(
+        "Generating GPU API embeddings for text with length '%s' with model: %s",
+        len(text) if isinstance(text, str) else sum(len(t) for t in text),
+        model.value,
+    )
+
     gpu_api_url = f"{settings.GPU_API_URL}/embeddings/embed"
 
     payload = {
@@ -67,6 +76,12 @@ async def stream_gpu_api_response(
     """
     Stream a response from the GPU API service.
     """
+    logger.info(
+        "Streaming GPU API response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     gpu_api_url = f"{settings.GPU_API_URL}/stream/"
 
     payload = {
@@ -99,10 +114,16 @@ async def stream_gpu_api_response(
                         yield chunk.decode("utf-8")
 
         except httpx.RequestError as e:
+            logger.exception("Connection error to GPU API")
+
             yield f"data: Connection error to GPU API: {e!s}\n\n"
         except asyncio.CancelledError:
+            logger.exception("Streaming cancelled from GPU API")
+
             return
         except Exception as e:
+            logger.exception("Unexpected error while streaming from GPU API")
+
             yield f"data: Unexpected error: {e!s}\n\n"
 
     return StreamingResponse(

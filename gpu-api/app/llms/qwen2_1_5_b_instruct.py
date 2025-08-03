@@ -1,9 +1,12 @@
+import logging
 from collections.abc import AsyncGenerator
 
 import torch
 from langchain_huggingface import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.pipelines import pipeline
+
+logger = logging.getLogger(__name__)
 
 _pipelines: dict[tuple[float, float, int], HuggingFacePipeline] = {}
 
@@ -17,6 +20,13 @@ def get_qwen2_pipeline(
     Retrieves or initializes a HuggingFace pipeline for the Qwen2-1.5B model
     with the specified parameters.
     """
+    logger.info(
+        "Initializing Qwen2-1.5B pipeline with temperature: %s, top_p: %s, max_tokens: %s",
+        temperature,
+        top_p,
+        max_tokens,
+    )
+
     model_id = "Qwen/Qwen2-1.5B-Instruct"
     key = (temperature, top_p, max_tokens)
 
@@ -62,6 +72,11 @@ async def stream_qwen2_response(
     """
     Streams a response from the Qwen2-1.5B model using the specified parameters.
     """
+    logger.info(
+        "Streaming Qwen2-1.5B response for user prompt: %s",
+        user_prompt,
+    )
+
     llm = get_qwen2_pipeline(temperature, top_p, max_tokens)
 
     messages = [

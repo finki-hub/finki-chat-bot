@@ -12,9 +12,12 @@ from app.api.health import router as health_router
 from app.api.links import router as links_router
 from app.api.questions import router as questions_router
 from app.data.connection import Database
+from app.utils.logger import setup_logging
 from app.utils.settings import Settings
 
 settings = Settings()
+
+setup_logging(level=settings.LOG_LEVEL)
 
 
 @asynccontextmanager

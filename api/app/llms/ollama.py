@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncGenerator, Generator
 from typing import overload
 
@@ -11,10 +12,13 @@ from app.llms.models import Model
 from app.llms.prompts import stitch_system_user
 from app.utils.settings import Settings
 
+logger = logging.getLogger(__name__)
+
 settings = Settings()
 
-_embed_clients: dict[Model, OllamaEmbeddings] = {}
-_llm_clients: dict[tuple[str, float, float, int], OllamaLLM] = {}
+# Model, temperature, top_p, max_tokens -> LLM
+ollama_llm_clients: dict[tuple[str, float, float, int], OllamaLLM] = {}
+ollama_embedders: dict[Model, OllamaEmbeddings] = {}
 
 
 def get_embedder(model: Model) -> OllamaEmbeddings:
@@ -22,12 +26,13 @@ def get_embedder(model: Model) -> OllamaEmbeddings:
     Return a singleton OllamaEmbeddings instance for the specified model.
     If the model is not already in the cache, create a new instance.
     """
-    if model not in _embed_clients:
-        _embed_clients[model] = OllamaEmbeddings(
+    if model not in ollama_embedders:
+        ollama_embedders[model] = OllamaEmbeddings(
             model=model.value,
             base_url=settings.OLLAMA_URL,
         )
-    return _embed_clients[model]
+
+    return ollama_embedders[model]
 
 
 def get_llm(
@@ -41,15 +46,17 @@ def get_llm(
     If the model and parameters are not already in the cache, create a new instance.
     """
     key = (model.value, temperature, top_p, max_tokens)
-    if key not in _llm_clients:
-        _llm_clients[key] = OllamaLLM(
+
+    if key not in ollama_llm_clients:
+        ollama_llm_clients[key] = OllamaLLM(
             model=model.value,
             base_url=settings.OLLAMA_URL,
             temperature=temperature,
             top_p=top_p,
             num_predict=max_tokens,
         )
-    return _llm_clients[key]
+
+    return ollama_llm_clients[key]
 
 
 @overload
@@ -74,9 +81,17 @@ async def generate_ollama_embeddings(
     Generate embeddings for the given text using the specified Ollama model.
     This function runs the embedding generation in a separate thread to avoid blocking the event loop.
     """
+    logger.info(
+        "Generating Ollama embeddings for text with length '%s' with model: %s",
+        len(text) if isinstance(text, str) else sum(len(t) for t in text),
+        model.value,
+    )
+
     emb = get_embedder(model)
+
     if isinstance(text, str):
         return await asyncio.to_thread(emb.embed_query, text)
+
     return await asyncio.to_thread(emb.embed_documents, text)
 
 
@@ -95,8 +110,13 @@ async def stream_ollama_response(
     initializes the LLM client, and streams the response as an async generator.
     The response is formatted as Server-Sent Events (SSE) for real-time updates.
     """
-    llm = get_llm(model, temperature, top_p, max_tokens)
+    logger.info(
+        "Streaming Ollama response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
 
+    llm = get_llm(model, temperature, top_p, max_tokens)
     full_prompt = stitch_system_user(system_prompt, user_prompt)
 
     def sync_token_gen() -> Generator[str]:
@@ -133,13 +153,28 @@ async def stream_ollama_agent_response(
     Stream a response from an Ollama agent with MCP tools.
     Falls back to regular response if MCP unavailable.
     """
+    logger.info(
+        "Streaming Ollama agent response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     try:
         llm = get_llm(model, temperature, top_p, max_tokens)
 
         client = build_mcp_client()
         tools = await client.get_tools()
 
+        logger.info(
+            "Available tools: %s",
+            ", ".join(tool.name for tool in tools) if tools else "None",
+        )
+
         if not tools:
+            logger.warning(
+                "No tools available for the agent. Falling back to regular response",
+            )
+
             return await stream_ollama_response(
                 user_prompt,
                 model,

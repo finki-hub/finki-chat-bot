@@ -5,7 +5,7 @@ from asyncpg import Pool, Record, create_pool
 
 from app.constants.db import SCHEMA_PATH
 
-db_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -32,7 +32,7 @@ class Database:
         Initialize the asyncpg pool if not already done.
         """
         if self.pool is None:
-            db_logger.info("Initializing database pool for %s", self.dsn)
+            logger.info("Initializing database pool")
             try:
                 self.pool = await create_pool(
                     dsn=self.dsn,
@@ -40,34 +40,34 @@ class Database:
                     max_size=self.max_size,
                 )
             except Exception:
-                db_logger.exception("Failed to initialize database pool")
+                logger.exception("Failed to initialize database pool")
                 raise
             else:
-                db_logger.info("Database pool initialized successfully")
+                logger.info("Database pool initialized successfully")
         else:
-            db_logger.debug("Database pool already initialized")
+            logger.debug("Database pool already initialized")
 
     async def disconnect(self) -> None:
         """
         Close and clean up the connection pool.
         """
         if self.pool:
-            db_logger.info("Closing database connection pool")
+            logger.info("Closing database connection pool")
             await self.pool.close()
             self.pool = None
-            db_logger.info("Database pool closed")
+            logger.info("Database pool closed")
 
     async def _ensure_pool(self) -> Pool:
         """
         Ensure the pool is up, initializing it if necessary.
         """
         if self.pool is None:
-            db_logger.warning("Pool not initialized, calling init()")
+            logger.warning("Pool not initialized, calling init()")
             await self.init()
 
         if self.pool is None:
             msg = "Database pool is None after init()"
-            db_logger.error(msg)
+            logger.error(msg)
             raise RuntimeError(msg)
 
         return self.pool
@@ -118,20 +118,20 @@ class Database:
         p = Path(SCHEMA_PATH)
         if not p.is_file():
             msg = f"Schema file not found at {SCHEMA_PATH}"
-            db_logger.error(msg)
+            logger.error(msg)
             raise FileNotFoundError(msg)
 
         sql = p.read_text().strip()
         if not sql:
-            db_logger.warning("Schema file is empty; skipping migrations")
+            logger.warning("Schema file is empty; skipping migrations")
             return
 
-        db_logger.info("Running migrations from %s", SCHEMA_PATH)
+        logger.info("Running migrations from %s", SCHEMA_PATH)
         async with pool.acquire() as conn:
             try:
                 await conn.execute(sql)
             except Exception:
-                db_logger.exception("Error executing migrations")
+                logger.exception("Error executing migrations")
                 raise
             else:
-                db_logger.info("Migrations applied successfully")
+                logger.info("Migrations applied successfully")

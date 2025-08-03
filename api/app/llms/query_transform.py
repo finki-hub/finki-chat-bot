@@ -1,6 +1,10 @@
+import logging
+
 from app.llms.models import Model
 from app.llms.openai import transform_query_with_openai
 from app.llms.prompts import DEFAULT_QUERY_TRANSFORM_SYSTEM_PROMPT
+
+logger = logging.getLogger(__name__)
 
 
 async def transform_query(
@@ -12,6 +16,11 @@ async def transform_query(
     top_p: float,
     max_tokens: int,
 ) -> str:
+    logger.info(
+        "Transforming query: '%s'",
+        query,
+    )
+
     match model:
         case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
             return await transform_query_with_openai(

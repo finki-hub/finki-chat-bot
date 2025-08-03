@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncGenerator, Generator
 from typing import overload
 
@@ -12,10 +13,13 @@ from app.llms.models import Model
 from app.llms.prompts import stitch_system_user
 from app.utils.settings import Settings
 
+logger = logging.getLogger(__name__)
+
 settings = Settings()
 
-_llm_clients_openai: dict[tuple[str, float, float, int], ChatOpenAI] = {}
-_openai_embedders: dict[str, OpenAIEmbeddings] = {}
+# Model, temperature, top_p, max_tokens -> LLM
+openai_llm_clients: dict[tuple[str, float, float, int], ChatOpenAI] = {}
+openai_embedders: dict[str, OpenAIEmbeddings] = {}
 
 
 def get_openai_embedder(model: Model) -> OpenAIEmbeddings:
@@ -24,12 +28,14 @@ def get_openai_embedder(model: Model) -> OpenAIEmbeddings:
     If the model is not already in the cache, create a new instance.
     """
     key = model.value
-    if key not in _openai_embedders:
-        _openai_embedders[key] = OpenAIEmbeddings(
+
+    if key not in openai_embedders:
+        openai_embedders[key] = OpenAIEmbeddings(
             model=model.value,
             api_key=SecretStr(settings.OPENAI_API_KEY),  # type: ignore[call-arg]
         )
-    return _openai_embedders[key]
+
+    return openai_embedders[key]
 
 
 def get_openai_llm(
@@ -43,8 +49,9 @@ def get_openai_llm(
     If the model and parameters are not already in the cache, create a new instance.
     """
     key = (model.value, temperature, top_p, max_tokens)
-    if key not in _llm_clients_openai:
-        _llm_clients_openai[key] = ChatOpenAI(
+
+    if key not in openai_llm_clients:
+        openai_llm_clients[key] = ChatOpenAI(
             model=model.value,
             api_key=SecretStr(settings.OPENAI_API_KEY),
             temperature=temperature,
@@ -52,7 +59,8 @@ def get_openai_llm(
             streaming=True,
             max_tokens=max_tokens,  # type: ignore[call-arg]
         )
-    return _llm_clients_openai[key]
+
+    return openai_llm_clients[key]
 
 
 @overload
@@ -77,9 +85,17 @@ async def generate_openai_embeddings(
     Generate embeddings for the given text using the specified OpenAI model.
     This function runs the embedding generation in a separate thread to avoid blocking the event loop.
     """
+    logger.info(
+        "Generating OpenAI embeddings for text with length '%s' with model: %s",
+        len(text) if isinstance(text, str) else sum(len(t) for t in text),
+        model.value,
+    )
+
     emb = get_openai_embedder(model)
+
     if isinstance(text, str):
         return await asyncio.to_thread(emb.embed_query, text)
+
     return await asyncio.to_thread(emb.embed_documents, text)
 
 
@@ -96,6 +112,12 @@ async def stream_openai_response(
     Stream a response from the specified OpenAI model using the provided user prompt and system prompt.
     The response is formatted as Server-Sent Events (SSE) for real-time updates.
     """
+    logger.info(
+        "Streaming OpenAI response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     llm = get_openai_llm(model, temperature, top_p, max_tokens)
     full_prompt = stitch_system_user(system_prompt, user_prompt)
 
@@ -134,13 +156,28 @@ async def stream_openai_agent_response(
     Stream a response from an OpenAI agent with MCP tools.
     Falls back to regular response if MCP unavailable.
     """
+    logger.info(
+        "Streaming OpenAI agent response for user prompt: '%s' with model: %s",
+        user_prompt,
+        model.value,
+    )
+
     try:
         llm = get_openai_llm(model, temperature, top_p, max_tokens)
 
         client = build_mcp_client()
         tools = await client.get_tools()
 
+        logger.info(
+            "Available tools: %s",
+            ", ".join(tool.name for tool in tools) if tools else "None",
+        )
+
         if not tools:
+            logger.warning(
+                "No tools available for the agent. Falling back to regular response",
+            )
+
             return await stream_openai_response(
                 user_prompt,
                 model,
@@ -181,6 +218,10 @@ async def stream_openai_agent_response(
         )
 
     except Exception:
+        logger.exception(
+            "Failed to stream OpenAI agent response. Falling back to regular response",
+        )
+
         return await stream_openai_response(
             user_prompt,
             model,
@@ -200,6 +241,17 @@ async def transform_query_with_openai(
     top_p: float,
     max_tokens: int,
 ) -> str:
+    """
+    Transform a query using the specified OpenAI model and system prompt.
+    If the transformation fails, return the original query.
+    """
+
+    logger.info(
+        "Transforming query: '%s' with model: %s",
+        query,
+        model,
+    )
+
     try:
         llm = get_openai_llm(model, temperature, top_p, max_tokens)
 
@@ -210,6 +262,7 @@ async def transform_query_with_openai(
 
         response = await llm.ainvoke(messages)
         return response.content.strip()  # type: ignore[union-attr]
-    except Exception as e:
-        print(f"Query transformation failed: {e}. Using original query.")
+    except Exception:
+        logger.exception("Query transformation failed: %s. Using original query.")
+
         return query

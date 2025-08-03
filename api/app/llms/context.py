@@ -1,3 +1,5 @@
+import logging
+
 import httpx
 
 from app.data.connection import Database
@@ -6,6 +8,8 @@ from app.llms.embeddings import generate_embeddings
 from app.llms.models import Model
 from app.llms.query_transform import transform_query
 from app.utils.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 settings = Settings()
 
@@ -31,7 +35,11 @@ async def get_retrieved_context(
     vector search.
     """
 
-    print(f"Transforming query: '{query[:100]}...'")
+    logger.info(
+        "Retrieving context for query: '%s' with embedding model: %s",
+        query,
+        embedding_model,
+    )
 
     query = await transform_query(
         query,
@@ -41,11 +49,9 @@ async def get_retrieved_context(
         max_tokens=512,
     )
 
-    print(f"Transformed query: '{query[:100]}...'")
+    logger.info("Transformed query: '%s'", query)
 
     retrieval_limit = initial_k if use_reranker else top_k
-
-    print(f"Reranking: {use_reranker}")
 
     try:
         query_to_embed = f"пребарување: {query}"
@@ -56,32 +62,47 @@ async def get_retrieved_context(
             embedding_model,
             limit=retrieval_limit,
         )
+
+        logger.info("Initial candidates retrieved: %d", len(initial_candidates))
+
         if not initial_candidates:
             return ""
+
     except Exception as e:
-        raise RetrievalError(f"Failed during initial vector search: {e}") from e
+        raise RetrievalError("Failed during initial vector search") from e
 
     candidate_docs = [
         f"Наслов: {q.name}\nСодржина: {q.content}" for q in initial_candidates
     ]
 
+    logger.info("Reranking enabled: %s", use_reranker)
+
     if use_reranker:
         try:
-            print(f"Sending {len(candidate_docs)} candidates to re-ranker...")
-            rerank_payload = {"query": query, "documents": candidate_docs}
+            logger.info("Sending %d candidates to re-ranker...", len(candidate_docs))
+
+            rerank_payload = {
+                "query": query,
+                "documents": candidate_docs,
+            }
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{settings.GPU_API_URL}/rerank/",
                     json=rerank_payload,
                 )
+
                 response.raise_for_status()
+
                 final_docs = response.json()["reranked_documents"]
-            print(
-                f"Re-ranking completed. Selected top {len(final_docs)} documents.",
+
+            logger.info(
+                "Selected top %d documents",
+                len(final_docs),
             )
-        except Exception as e:
-            print(
-                f"Re-ranking call failed: {e}. Using vector search order as a fallback.",
+        except Exception:
+            logger.exception(
+                "Reranking call failed. Using vector search order as a fallback",
             )
             final_docs = candidate_docs
     else:

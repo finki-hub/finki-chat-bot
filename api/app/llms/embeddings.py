@@ -1,4 +1,5 @@
 import json
+import logging
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from typing import overload
@@ -13,6 +14,8 @@ from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
 from app.llms.ollama import generate_ollama_embeddings
 from app.llms.openai import generate_openai_embeddings
 from app.utils.database import embedding_to_pgvector
+
+logger = logging.getLogger(__name__)
 
 
 @overload
@@ -36,6 +39,9 @@ async def generate_embeddings(
     """
     Generate embeddings for the given text using the specified model.
     """
+
+    logger.info("Generating embeddings for text: '%s'", text[:100])
+
     match model:
         case Model.LLAMA_3_3_70B | Model.BGE_M3:
             return await generate_ollama_embeddings(text, model)
@@ -66,6 +72,14 @@ async def stream_fill_embeddings(
     Can process a single model or all available embedding models.
     Emits one SSE event per question-model combination as JSON.
     """
+
+    logger.info(
+        "Starting to fill embeddings for model: %s, all_questions: %s, all_models: %s",
+        model,
+        all_questions,
+        all_models,
+    )
+
     models_to_process: list[Model]
     if all_models:
         models_to_process = list(MODEL_EMBEDDINGS_COLUMNS.keys())
