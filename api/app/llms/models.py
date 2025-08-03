@@ -31,6 +31,7 @@ class Model(Enum):
 MODEL_EMBEDDINGS_COLUMNS: dict[Model, str] = {
     Model.LLAMA_3_3_70B: "embedding_llama3_3_70b",
     Model.BGE_M3: "embedding_bge_m3",
+    Model.BGE_M3_LOCAL: "embedding_bge_m3",
     Model.TEXT_EMBEDDING_3_LARGE: "embedding_text_embedding_3_large",
     Model.TEXT_EMBEDDING_004: "embedding_text_embedding_004",
     Model.MULTILINGUAL_E5_LARGE: "embedding_multilingual_e5_large",
