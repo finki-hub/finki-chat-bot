@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    PRELOAD_BGEM3: bool = True
+
     ALLOWED_ORIGINS: list[str] = ["*"]
     EXPOSE_HEADERS: list[str] = ["*"]
 

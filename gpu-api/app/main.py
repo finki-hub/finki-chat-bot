@@ -1,3 +1,4 @@
+from asyncio import gather, to_thread
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -11,6 +12,7 @@ from app.api.embeddings import router as embeddings_router
 from app.api.health import router as health_router
 from app.api.rerank import router as rerank_router
 from app.api.streams import router as streams_router
+from app.llms.bge_m3 import init_bge_m3_embedder
 from app.llms.reranker import init_reranker
 from app.utils.logger import setup_logging
 from app.utils.settings import Settings
@@ -21,8 +23,13 @@ setup_logging(level=settings.LOG_LEVEL)
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
-    init_reranker()
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    tasks = [to_thread(init_reranker)]
+    if settings.PRELOAD_BGEM3:
+        tasks.append(to_thread(init_bge_m3_embedder))
+
+    await gather(*tasks)
+
     yield
 
 

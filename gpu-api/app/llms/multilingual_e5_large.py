@@ -25,9 +25,9 @@ def get_multilingual_e5_large_embeddings(
     """
     global _multilingual_e5_large_embedder  # noqa: PLW0603
 
-    logger.info("Loading Multilingual E5 Large embeddings model...")
-
     if _multilingual_e5_large_embedder is None:
+        logger.info("Loading Multilingual E5 Large embeddings model...")
+
         device = "cuda" if torch.cuda.is_available() else "cpu"
         _multilingual_e5_large_embedder = HuggingFaceEmbeddings(
             model_name="intfloat/multilingual-e5-large",

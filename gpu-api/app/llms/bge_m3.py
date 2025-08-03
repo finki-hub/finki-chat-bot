@@ -23,9 +23,9 @@ def get_bge_m3_embeddings(text: str | list[str]) -> list[float] | list[list[floa
     """
     global _bge_m3_embedder  # noqa: PLW0603
 
-    logger.info("Loading BGE M3 embeddings model...")
-
     if _bge_m3_embedder is None:
+        logger.info("Loading BGE M3 embeddings model...")
+
         device = "cuda" if torch.cuda.is_available() else "cpu"
         _bge_m3_embedder = HuggingFaceEmbeddings(
             model_name="BAAI/bge-m3",
@@ -37,3 +37,18 @@ def get_bge_m3_embeddings(text: str | list[str]) -> list[float] | list[list[floa
         return _bge_m3_embedder.embed_query(text)
 
     return _bge_m3_embedder.embed_documents(text)
+
+
+def init_bge_m3_embedder() -> None:
+    """
+    Initialize the BGE M3 embedder.
+    This function is called during application startup to ensure the embedder is ready for use.
+    """
+
+    logger.info("Initializing BGE M3 embeddings model...")
+
+    if _bge_m3_embedder is None:
+        get_bge_m3_embeddings("Initialization check")
+        logger.info("BGE M3 embeddings model initialized successfully.")
+    else:
+        logger.info("BGE M3 embeddings model is already initialized.")
