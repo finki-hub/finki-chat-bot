@@ -638,15 +638,15 @@ wheels = [
 
 [[package]]
 name = "langchain-ollama"
-version = "0.3.9"
+version = "0.3.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "ollama" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/11/684cd525d01ca7337bab115ac31af7a1814bdae45ad80fa44792eaaafad0/langchain_ollama-0.3.9.tar.gz", hash = "sha256:6ed5210b15d0261fdb3354f80b451a0c93d18788b2aed9af9f5bdc8d4e7947a9", size = 35252, upload-time = "2025-10-02T02:33:56.859Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/73/c9/ff996fc5fa2d8d23136f07c56e88a1013fe1e03a35ef3e65899baa73c49e/langchain_ollama-0.3.10.tar.gz", hash = "sha256:5d942d331c44351bae5c5c5965603ceb20b0ee4d70082290f4b15bc638559756", size = 35771, upload-time = "2025-10-02T15:53:20.974Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/4f/5a11d9cb2529efb2f7923a294320697a47f21f1f62e3fee1dc7f9f802c19/langchain_ollama-0.3.9-py3-none-any.whl", hash = "sha256:40ee57c86325bb962d483b1f1fa602371e2d00c89a85a69ed685b5e999a88367", size = 27557, upload-time = "2025-10-02T02:33:55.835Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/f2/d87767a106021206fb53faf7ae4517d365d353dc29a1649b9f3e47eef940/langchain_ollama-0.3.10-py3-none-any.whl", hash = "sha256:7550792872e8f86d362568e9ceb0f8085428bc59946c7b44e726358ba4b280f9", size = 27646, upload-time = "2025-10-02T15:53:19.89Z" },
 ]
 
 [[package]]
