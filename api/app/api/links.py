@@ -131,7 +131,7 @@ async def update_link(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No updates provided",
         )
-    updated = await update_link_query(db, decoded, payload)
+    updated = await update_link_query(db, decoded, updates)
     if not updated:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

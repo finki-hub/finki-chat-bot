@@ -1,7 +1,7 @@
-# mypy: disable-error-code="arg-type"
+from pydantic import BaseModel, HttpUrl
 
 from app.data.connection import Database
-from app.schemas.links import CreateLinkSchema, LinkSchema, UpdateLinkSchema
+from app.schemas.links import CreateLinkSchema, LinkSchema
 
 
 async def get_links_query(db: Database) -> list[LinkSchema]:
@@ -54,23 +54,37 @@ async def create_link_query(
 async def update_link_query(
     db: Database,
     name: str,
-    link: UpdateLinkSchema,
+    updates: dict,
 ) -> LinkSchema | None:
-    query = """
-    UPDATE link
-    SET name = $1, url = $2, description = $3, user_id = $4
-    WHERE name = $5
-    RETURNING *
-    """
-    result = await db.fetchrow(
-        query,
-        link.name,
-        link.url,
-        link.description,
-        link.user_id,
-        name,
-    )
+    if not updates:
+        return None
 
+    for key, value in tuple(updates.items()):
+        if isinstance(value, BaseModel):
+            updates[key] = value.model_dump()
+        elif isinstance(value, HttpUrl):
+            updates[key] = str(value)
+
+    set_clauses = []
+    values = []
+    param_index = 1
+
+    for key, value in updates.items():
+        set_clauses.append(f"{key} = ${param_index}")
+        values.append(value)
+        param_index += 1
+
+    values.append(name)
+    where_placeholder = f"${param_index}"
+
+    query = f"""
+    UPDATE link
+    SET {", ".join(set_clauses)}
+    WHERE name = {where_placeholder}
+    RETURNING *
+    """  # noqa: S608
+
+    result = await db.fetchrow(query, *values)
     if not result:
         return None
 
