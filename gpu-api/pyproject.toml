@@ -5,18 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "accelerate>=1.9.0",
-    "fastapi[all]>=0.116.1",
+    "accelerate>=1.11.0",
+    "fastapi[all]>=0.120.3",
     "gunicorn>=23.0.0",
-    "langchain>=0.3.27",
-    "langchain-huggingface>=0.3.1",
-    "sentence-transformers>=5.0.0",
+    "langchain>=1.0.3",
+    "langchain-huggingface>=1.0.0",
+    "sentence-transformers>=5.1.2",
     "torch>=2.7.1",
-    "transformers>=4.54.1",
+    "transformers>=4.57.1",
 ]
 
 [dependency-groups]
-dev = ["mypy>=1.17.1", "ruff>=0.12.7"]
+dev = ["mypy>=1.18.2", "ruff>=0.14.2"]
 
 [[tool.uv.index]]
 name = "pytorch-cu118"

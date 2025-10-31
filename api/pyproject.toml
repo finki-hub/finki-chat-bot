@@ -6,20 +6,20 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "asyncpg>=0.30.0",
-    "fastapi[all]>=0.116.1",
+    "fastapi[all]>=0.120.3",
     "gunicorn>=23.0.0",
     "httpx>=0.28.1",
-    "langchain>=0.3.27",
-    "langchain-google-genai>=2.1.8",
-    "langchain-mcp-adapters>=0.1.9",
-    "langchain-ollama>=0.3.6",
-    "langchain-openai>=0.3.28",
-    "langgraph>=0.6.2",
-    "pydantic>=2.11.7",
+    "langchain>=1.0.3",
+    "langchain-google-genai>=3.0.0",
+    "langchain-mcp-adapters>=0.1.12",
+    "langchain-ollama>=1.0.0",
+    "langchain-openai>=1.0.1",
+    "langgraph>=1.0.2",
+    "pydantic>=2.12.3",
 ]
 
 [dependency-groups]
-dev = ["asyncpg-stubs>=0.30.2", "mypy>=1.17.1", "ruff>=0.12.7"]
+dev = ["asyncpg-stubs>=0.30.2", "mypy>=1.18.2", "ruff>=0.14.2"]
 
 [tool.mypy]
 python_version = "3.13"
