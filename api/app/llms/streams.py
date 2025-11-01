@@ -11,7 +11,7 @@ from app.llms.openai import stream_openai_agent_response, stream_openai_response
 logger = logging.getLogger(__name__)
 
 
-async def stream_response(
+def stream_response(
     user_prompt: str,
     model: Model,
     *,
@@ -38,7 +38,7 @@ async def stream_response(
             | Model.DOMESTIC_YAK_8B_INSTRUCT_GGUF
             | Model.VEZILKALLM_GGUF
         ):
-            return await stream_ollama_response(
+            return stream_ollama_response(
                 user_prompt,
                 model,
                 system_prompt=system_prompt,
@@ -48,7 +48,7 @@ async def stream_response(
             )
 
         case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
-            return await stream_openai_response(
+            return stream_openai_response(
                 user_prompt,
                 model,
                 system_prompt=system_prompt,
@@ -58,7 +58,7 @@ async def stream_response(
             )
 
         case Model.GEMINI_2_5_FLASH_PREVIEW_05_20:
-            return await stream_google_response(
+            return stream_google_response(
                 user_prompt,
                 model,
                 system_prompt=system_prompt,
@@ -68,7 +68,7 @@ async def stream_response(
             )
 
         case Model.QWEN2_1_5_B_INSTRUCT:
-            return await stream_gpu_api_response(
+            return stream_gpu_api_response(
                 user_prompt,
                 model,
                 system_prompt=system_prompt,

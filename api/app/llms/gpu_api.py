@@ -62,7 +62,7 @@ async def generate_gpu_api_embeddings(
         raise GpuApiError(f"An unexpected error occurred calling GPU API: {e}") from e
 
 
-async def stream_gpu_api_response(
+def stream_gpu_api_response(
     user_prompt: str,
     model: Model,
     *,
@@ -118,7 +118,7 @@ async def stream_gpu_api_response(
         except asyncio.CancelledError:
             logger.exception("Streaming cancelled from GPU API")
 
-            return
+            raise
         except Exception as e:
             logger.exception("Unexpected error while streaming from GPU API")
 

@@ -14,7 +14,7 @@ from app.schemas.chat import ChatSchema
 logger = logging.getLogger(__name__)
 
 
-async def handle_regular_chat(
+def handle_regular_chat(
     payload: ChatSchema,
     context: str,
 ) -> StreamingResponse:
@@ -30,7 +30,7 @@ async def handle_regular_chat(
     system_prompt = payload.system_prompt or DEFAULT_SYSTEM_PROMPT
     user_prompt = build_user_prompt(context, payload.prompt)
 
-    return await stream_response(
+    return stream_response(
         user_prompt,
         payload.inference_model,
         system_prompt=system_prompt,

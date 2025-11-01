@@ -96,7 +96,7 @@ async def chat(
 
         if payload.use_agent:
             return await handle_agent_chat(payload, context)
-        return await handle_regular_chat(payload, context)
+        return handle_regular_chat(payload, context)
 
     except ModelNotReadyError as e:
         logger.exception("Model not ready for chat request: %s")

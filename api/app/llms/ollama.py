@@ -4,8 +4,9 @@ from collections.abc import AsyncGenerator, Generator
 from typing import overload
 
 from fastapi.responses import StreamingResponse
-from langchain_ollama import OllamaEmbeddings, OllamaLLM
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langgraph.graph.state import CompiledStateGraph
 
 from app.llms.mcp import build_mcp_client
 from app.llms.models import Model
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 settings = Settings()
 
 # Model, temperature, top_p, max_tokens -> LLM
-ollama_llm_clients: dict[tuple[str, float, float, int], OllamaLLM] = {}
+ollama_chat_clients: dict[tuple[str, float, float, int], ChatOllama] = {}
 ollama_embedders: dict[Model, OllamaEmbeddings] = {}
 
 
@@ -40,15 +41,15 @@ def get_llm(
     temperature: float,
     top_p: float,
     max_tokens: int,
-) -> OllamaLLM:
+) -> ChatOllama:
     """
-    Return a singleton OllamaLLM instance for the specified model and sampling parameters.
+    Return a singleton ChatOllama instance for the specified model and sampling parameters.
     If the model and parameters are not already in the cache, create a new instance.
     """
     key = (model.value, temperature, top_p, max_tokens)
 
-    if key not in ollama_llm_clients:
-        ollama_llm_clients[key] = OllamaLLM(
+    if key not in ollama_chat_clients:
+        ollama_chat_clients[key] = ChatOllama(
             model=model.value,
             base_url=settings.OLLAMA_URL,
             temperature=temperature,
@@ -56,7 +57,7 @@ def get_llm(
             num_predict=max_tokens,
         )
 
-    return ollama_llm_clients[key]
+    return ollama_chat_clients[key]
 
 
 @overload
@@ -95,7 +96,7 @@ async def generate_ollama_embeddings(
     return await asyncio.to_thread(emb.embed_documents, text)
 
 
-async def stream_ollama_response(
+def stream_ollama_response(
     user_prompt: str,
     model: Model,
     *,
@@ -120,23 +121,63 @@ async def stream_ollama_response(
     full_prompt = stitch_system_user(system_prompt, user_prompt)
 
     def sync_token_gen() -> Generator[str]:
-        yield from llm.stream(full_prompt)
+        for chunk in llm.stream(full_prompt):
+            yield str(chunk.content)
 
     async def async_token_gen() -> AsyncGenerator[str]:
         it = sync_token_gen()
-        try:
-            while True:
-                chunk = await asyncio.to_thread(next, it, None)
-                if chunk is None:
-                    break
-                preserved_chunk = chunk.replace("\n", "\\n")
-                yield f"data: {preserved_chunk}\n\n"
-        except asyncio.CancelledError:
-            return
+        while True:
+            chunk = await asyncio.to_thread(next, it, None)
+            if chunk is None:
+                break
+            preserved_chunk = chunk.replace("\n", "\\n")
+            yield f"data: {preserved_chunk}\n\n"
 
     return StreamingResponse(
         async_token_gen(),
         media_type="text/event-stream",
+    )
+
+
+async def _create_agent_token_generator(
+    agent: CompiledStateGraph,
+    messages: list[dict[str, str]],
+) -> AsyncGenerator[str]:
+    """Helper function to generate tokens from agent stream."""
+    try:
+        async for chunk in agent.astream(
+            {"messages": messages},
+            {"configurable": {"thread_id": "default"}},
+        ):
+            if "agent" in chunk:
+                agent_messages = chunk["agent"]["messages"]
+                for message in agent_messages:
+                    if hasattr(message, "content") and message.content:
+                        content = str(message.content)
+                        preserved_content = content.replace("\n", "\\n")
+                        yield f"data: {preserved_content}\n\n"
+
+    except Exception as e:
+        error_msg = f"Agent error: {e!s}"
+        yield f"data: {error_msg}\n\n"
+
+
+def _fallback_to_regular_response(
+    user_prompt: str,
+    model: Model,
+    system_prompt: str,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+) -> StreamingResponse:
+    """Helper function to return fallback response."""
+    return stream_ollama_response(
+        user_prompt,
+        model,
+        system_prompt=system_prompt,
+        temperature=temperature,
+        top_p=top_p,
+        max_tokens=max_tokens,
     )
 
 
@@ -175,51 +216,33 @@ async def stream_ollama_agent_response(
                 "No tools available for the agent. Falling back to regular response",
             )
 
-            return await stream_ollama_response(
+            return _fallback_to_regular_response(
                 user_prompt,
                 model,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
+                system_prompt,
+                temperature,
+                top_p,
+                max_tokens,
             )
 
-        agent = create_react_agent(llm, tools)
+        agent: CompiledStateGraph = create_agent(llm, tools)
 
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
 
-        async def async_token_gen() -> AsyncGenerator[str]:
-            try:
-                async for chunk in agent.astream(
-                    {"messages": messages},
-                    {"configurable": {"thread_id": "default"}},
-                ):
-                    if "agent" in chunk:
-                        agent_messages = chunk["agent"]["messages"]
-                        for message in agent_messages:
-                            if hasattr(message, "content") and message.content:
-                                content = str(message.content)
-                                preserved_content = content.replace("\n", "\\n")
-                                yield f"data: {preserved_content}\n\n"
-
-            except Exception as e:
-                error_msg = f"Agent error: {e!s}"
-                yield f"data: {error_msg}\n\n"
-
         return StreamingResponse(
-            async_token_gen(),
+            _create_agent_token_generator(agent, messages),
             media_type="text/event-stream",
         )
 
     except Exception:
-        return await stream_ollama_response(
+        return _fallback_to_regular_response(
             user_prompt,
             model,
-            system_prompt=system_prompt,
-            temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
+            system_prompt,
+            temperature,
+            top_p,
+            max_tokens,
         )
