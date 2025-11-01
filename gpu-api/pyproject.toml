@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "accelerate>=1.11.0",
-    "fastapi[all]>=0.120.3",
+    "fastapi[all]>=0.120.4",
     "gunicorn>=23.0.0",
     "langchain>=1.0.3",
     "langchain-huggingface>=1.0.0",
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["mypy>=1.18.2", "ruff>=0.14.2"]
+dev = ["mypy>=1.18.2", "ruff>=0.14.3"]
 
 [[tool.uv.index]]
 name = "pytorch-cu118"

@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "asyncpg>=0.30.0",
-    "fastapi[all]>=0.120.3",
+    "fastapi[all]>=0.120.4",
     "gunicorn>=23.0.0",
     "httpx>=0.28.1",
     "langchain>=1.0.3",
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["asyncpg-stubs>=0.30.2", "mypy>=1.18.2", "ruff>=0.14.2"]
+dev = ["asyncpg-stubs>=0.30.2", "mypy>=1.18.2", "ruff>=0.14.3"]
 
 [tool.mypy]
 python_version = "3.13"
