@@ -12,14 +12,12 @@ permissions:
 
 jobs:
   ruff:
-    name: Ruff (API)
     uses: finki-hub/.github/.github/workflows/ruff.yaml@main
     with:
       working-directory: ./api
     secrets: inherit
 
   mypy:
-    name: MyPy (API)
     uses: finki-hub/.github/.github/workflows/mypy.yaml@main
     with:
       working-directory: ./api
