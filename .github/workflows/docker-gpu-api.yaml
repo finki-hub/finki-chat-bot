@@ -1,4 +1,4 @@
-name: Docker (API)
+name: Docker (GPU API)
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
   docker:
     uses: finki-hub/.github/.github/workflows/docker.yaml@main
     with:
-      dockerfile: ./api/Dockerfile
-      context: ./api
-      package-name: finki-chat-bot-api
+      dockerfile: ./gpu-api/Dockerfile
+      context: ./gpu-api
+      package-name: finki-chat-bot-gpu-api
     secrets: inherit
