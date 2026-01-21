@@ -1,15 +1,11 @@
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
 
-ENV UV_CREATE_VENV=1 \
-    UV_VENV_PATH=/app/.venv \
-    UV_PYTHON_MINOR=13 \
+ENV UV_VENV_PATH=/app/.venv \
     UV_PYTHON_DOWNLOADS=0 \
-    UV_COMPILE_BYTECODE=1 \
+    UV_COMPILE_BYTECODE=0 \
     UV_LINK_MODE=copy
 
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y wget git && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock ./
 
@@ -20,13 +16,29 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-bookworm AS final
+# Aggressive cleanup
+RUN set -ex && \
+    find /app/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/.venv -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/.venv -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true && \
+    rm -rf /app/.venv/lib/python3.13/site-packages/torch/test 2>/dev/null || true && \
+    rm -rf /app/.venv/lib/python3.13/site-packages/torch/_inductor/autoheuristic/datasets 2>/dev/null || true && \
+    find /app/.venv -type f -name "*.a" -delete 2>/dev/null || true && \
+    find /app/.venv -type f -name "*.h" -delete 2>/dev/null || true && \
+    find /app/.venv -type d -name "include" -exec rm -rf {} + 2>/dev/null || true && \
+    du -sh /app/.venv
+
+FROM python:3.13-slim-bookworm AS final
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends wget && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app /app
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/app /app/app
+COPY --from=builder /app/gunicorn.conf.py /app/
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1
