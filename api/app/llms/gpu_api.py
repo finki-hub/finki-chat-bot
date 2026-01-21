@@ -104,25 +104,28 @@ def stream_gpu_api_response(
             ):
                 if response.status_code != 200:
                     error_text = await response.aread()
-                    yield f"data: Error from GPU API: {error_text.decode()}\n\n"
+                    logger.error(
+                        "GPU API returned error status %d: %s",
+                        response.status_code,
+                        error_text.decode(),
+                    )
+                    yield "data: An error occurred while processing your request. Please try again.\n\n"
                     return
 
                 async for chunk in response.aiter_bytes():
                     if chunk:
                         yield chunk.decode("utf-8")
 
-        except httpx.RequestError as e:
+        except httpx.RequestError:
             logger.exception("Connection error to GPU API")
-
-            yield f"data: Connection error to GPU API: {e!s}\n\n"
+            yield "data: An error occurred while processing your request. Please try again.\n\n"
         except asyncio.CancelledError:
             logger.exception("Streaming cancelled from GPU API")
 
             raise
-        except Exception as e:
+        except Exception:
             logger.exception("Unexpected error while streaming from GPU API")
-
-            yield f"data: Unexpected error: {e!s}\n\n"
+            yield "data: An error occurred while processing your request. Please try again.\n\n"
 
     return StreamingResponse(
         stream_from_gpu_api(),

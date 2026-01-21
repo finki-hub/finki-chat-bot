@@ -159,9 +159,9 @@ async def _create_agent_token_generator(
                         preserved_content = content.replace("\n", "\\n")
                         yield f"data: {preserved_content}\n\n"
 
-    except Exception as e:
-        error_msg = f"Agent error: {e!s}"
-        yield f"data: {error_msg}\n\n"
+    except Exception:
+        logger.exception("Agent error occurred during streaming")
+        yield "data: An error occurred while processing your request. Please try again.\n\n"
 
 
 def _fallback_to_regular_response(
