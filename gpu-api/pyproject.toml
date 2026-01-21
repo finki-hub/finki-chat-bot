@@ -5,30 +5,30 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "accelerate>=1.12.0",
-    "fastapi[all]>=0.124.4",
-    "gunicorn>=23.0.0",
-    "langchain>=1.2.0",
-    "langchain-huggingface>=1.2.0",
-    "sentence-transformers>=5.2.0",
-    "torch>=2.7.1",
-    "transformers>=4.57.3",
+  "accelerate>=1.12.0",
+  "fastapi[all]>=0.124.4",
+  "gunicorn>=23.0.0",
+  "langchain>=1.2.0",
+  "langchain-huggingface>=1.2.0",
+  "sentence-transformers>=5.2.0",
+  "torch>=2.9.1",
+  "transformers>=4.57.3",
 ]
 
 [dependency-groups]
 dev = ["mypy>=1.19.1", "ruff>=0.14.9"]
 
 [[tool.uv.index]]
-name = "pytorch-cu118"
-url = "https://download.pytorch.org/whl/cu118"
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cu118", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu128", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 torchvision = [
-    { index = "pytorch-cu118", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu128", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 
 [tool.mypy]
@@ -39,51 +39,51 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = [
-    "F",
-    "E",
-    "W",
-    "I",
-    "N",
-    "UP",
-    "YTT",
-    "ANN",
-    "ASYNC",
-    "S",
-    "B",
-    "COM",
-    "C4",
-    "DTZ",
-    "FA",
-    "ISC",
-    "ICN",
-    "G",
-    "INP",
-    "PIE",
-    "PT",
-    "Q",
-    "RSE",
-    "RET",
-    "SLF",
-    "SIM",
-    "TID",
-    "PTH",
-    "PGH",
-    "PL",
-    "TRY",
-    "FLY",
-    "PERF",
-    "FURB",
-    "LOG",
-    "RUF",
+  "F",
+  "E",
+  "W",
+  "I",
+  "N",
+  "UP",
+  "YTT",
+  "ANN",
+  "ASYNC",
+  "S",
+  "B",
+  "COM",
+  "C4",
+  "DTZ",
+  "FA",
+  "ISC",
+  "ICN",
+  "G",
+  "INP",
+  "PIE",
+  "PT",
+  "Q",
+  "RSE",
+  "RET",
+  "SLF",
+  "SIM",
+  "TID",
+  "PTH",
+  "PGH",
+  "PL",
+  "TRY",
+  "FLY",
+  "PERF",
+  "FURB",
+  "LOG",
+  "RUF",
 ]
 ignore = [
-    "PLR2004",
-    "PLR0912",
-    "PLR0915",
-    "TRY003",
-    "PLR0911",
-    "RET504",
-    "RUF001",
-    "E501",
-    "PLR0913",
+  "PLR2004",
+  "PLR0912",
+  "PLR0915",
+  "TRY003",
+  "PLR0911",
+  "RET504",
+  "RUF001",
+  "E501",
+  "PLR0913",
 ]
