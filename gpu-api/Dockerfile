@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-trixie AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
 
 ENV UV_CREATE_VENV=1 \
     UV_VENV_PATH=/app/.venv \
@@ -20,17 +20,13 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-slim AS final
+FROM python:3.13-bookworm AS final
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-# Copy virtual environment and application code separately for better caching
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/app /app/app
-COPY --from=builder /app/gunicorn.conf.py /app/gunicorn.conf.py
-COPY --from=builder /app/pyproject.toml /app/pyproject.toml
+COPY --from=builder /app /app
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1
