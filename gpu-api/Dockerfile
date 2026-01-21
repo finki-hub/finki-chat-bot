@@ -20,13 +20,17 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-trixie AS final
+FROM python:3.13-slim AS final
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app /app
+# Copy virtual environment and application code separately for better caching
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/app /app/app
+COPY --from=builder /app/gunicorn.conf.py /app/gunicorn.conf.py
+COPY --from=builder /app/pyproject.toml /app/pyproject.toml
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1
