@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-trixie AS builder
 
 ENV UV_CREATE_VENV=1 \
     UV_VENV_PATH=/app/.venv \
@@ -20,7 +20,7 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-FROM python:3.13-bookworm AS final
+FROM python:3.13-trixie AS final
 
 WORKDIR /app
 
