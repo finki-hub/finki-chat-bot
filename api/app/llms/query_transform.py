@@ -22,7 +22,14 @@ async def transform_query(
     )
 
     match model:
-        case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
+        case (
+            Model.GPT_4O_MINI
+            | Model.GPT_4_1_MINI
+            | Model.GPT_4_1_NANO
+            | Model.GPT_5_2
+            | Model.GPT_5_MINI
+            | Model.GPT_5_NANO
+        ):
             return await transform_query_with_openai(
                 query,
                 model,

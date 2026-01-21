@@ -47,7 +47,14 @@ def stream_response(
                 max_tokens=max_tokens,
             )
 
-        case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
+        case (
+            Model.GPT_4O_MINI
+            | Model.GPT_4_1_MINI
+            | Model.GPT_4_1_NANO
+            | Model.GPT_5_2
+            | Model.GPT_5_MINI
+            | Model.GPT_5_NANO
+        ):
             return stream_openai_response(
                 user_prompt,
                 model,
@@ -117,7 +124,14 @@ async def stream_response_with_agent(
                 max_tokens=max_tokens,
             )
 
-        case Model.GPT_4O_MINI | Model.GPT_4_1_MINI | Model.GPT_4_1_NANO:
+        case (
+            Model.GPT_4O_MINI
+            | Model.GPT_4_1_MINI
+            | Model.GPT_4_1_NANO
+            | Model.GPT_5_2
+            | Model.GPT_5_MINI
+            | Model.GPT_5_NANO
+        ):
             return await stream_openai_agent_response(
                 user_prompt,
                 model,
