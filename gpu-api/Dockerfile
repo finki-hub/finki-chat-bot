@@ -2,7 +2,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm AS builder
 
 ENV UV_VENV_PATH=/app/.venv \
     UV_PYTHON_DOWNLOADS=0 \
-    UV_COMPILE_BYTECODE=0 \
+    UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
 WORKDIR /app
@@ -16,18 +16,9 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-# Aggressive cleanup
-RUN set -ex && \
-    find /app/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/.venv -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
-    find /app/.venv -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true && \
-    rm -rf /app/.venv/lib/python3.13/site-packages/torch/test 2>/dev/null || true && \
-    rm -rf /app/.venv/lib/python3.13/site-packages/torch/_inductor/autoheuristic/datasets 2>/dev/null || true && \
-    find /app/.venv -type f -name "*.a" -delete 2>/dev/null || true && \
-    find /app/.venv -type f -name "*.h" -delete 2>/dev/null || true && \
-    find /app/.venv -type d -name "include" -exec rm -rf {} + 2>/dev/null || true && \
-    du -sh /app/.venv
+RUN find /app/.venv -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/.venv -type d \( -name "tests" -o -name "test" \) -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /app/.venv/lib/python3.13/site-packages/torch/test 2>/dev/null || true
 
 FROM python:3.13-slim-bookworm AS final
 
