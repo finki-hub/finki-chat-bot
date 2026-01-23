@@ -16,4 +16,5 @@ jobs:
       context: ./gpu-api
       package-name: finki-chat-bot-gpu-api
       platforms: linux/amd64
+      free-disk-space: true
     secrets: inherit
