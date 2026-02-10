@@ -1,6 +1,6 @@
 import logging
-from pathlib import Path
 
+import anyio
 from asyncpg import Pool, Record, create_pool
 
 from app.constants.db import SCHEMA_PATH
@@ -115,13 +115,13 @@ class Database:
         """
         pool = await self._ensure_pool()
 
-        p = Path(SCHEMA_PATH)
-        if not p.is_file():
+        p = anyio.Path(SCHEMA_PATH)
+        if not await p.is_file():
             msg = f"Schema file not found at {SCHEMA_PATH}"
             logger.error(msg)
             raise FileNotFoundError(msg)
 
-        sql = p.read_text().strip()
+        sql = (await p.read_text()).strip()
         if not sql:
             logger.warning("Schema file is empty; skipping migrations")
             return
