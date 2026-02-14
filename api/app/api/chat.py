@@ -7,7 +7,7 @@ from ollama import ResponseError
 
 from app.data.connection import Database
 from app.data.db import get_db
-from app.llms.chat import handle_agent_chat, handle_regular_chat
+from app.llms.chat import handle_chat
 from app.llms.context import RetrievalError, get_retrieved_context
 from app.llms.models import Model
 from app.schemas.chat import ChatSchema
@@ -94,9 +94,7 @@ async def chat(
                 "Не можев да пронајдам релевантни информации во базата на податоци."
             )
 
-        if payload.use_agent:
-            return await handle_agent_chat(payload, context)
-        return handle_regular_chat(payload, context)
+        return await handle_chat(payload, context)
 
     except ModelNotReadyError as e:
         logger.exception("Model not ready for chat request: %s")
