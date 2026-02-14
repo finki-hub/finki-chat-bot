@@ -238,6 +238,10 @@ async def stream_ollama_agent_response(
         )
 
     except Exception:
+        logger.exception(
+            "Failed to stream Ollama agent response. Falling back to regular response",
+        )
+
         return _fallback_to_regular_response(
             user_prompt,
             model,

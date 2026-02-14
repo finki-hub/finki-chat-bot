@@ -6,7 +6,6 @@ import httpx
 from fastapi.responses import StreamingResponse
 
 from app.llms.models import GPU_API_MODELS, Model
-from app.utils.exceptions import GpuApiError, ModelNotReadyError
 from app.utils.settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -34,32 +33,19 @@ async def generate_gpu_api_embeddings(
         "embeddings_model": GPU_API_MODELS[model],
     }
 
-    try:
-        async with httpx.AsyncClient(timeout=300) as client:
-            response = await client.post(
-                gpu_api_url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-            )
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(
+            gpu_api_url,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+        )
 
-            response.raise_for_status()
+        response.raise_for_status()
 
-            result = response.json()
-            embeddings = result.get("embeddings")
+        result = response.json()
+        embeddings = result.get("embeddings")
 
-            return embeddings
-
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == 503:
-            raise ModelNotReadyError from e
-
-        raise GpuApiError(
-            f"GPU API returned an error: {e.response.status_code} - {e.response.text}",
-        ) from e
-    except httpx.RequestError as e:
-        raise GpuApiError(f"Connection error to GPU API: {e}") from e
-    except Exception as e:
-        raise GpuApiError(f"An unexpected error occurred calling GPU API: {e}") from e
+        return embeddings
 
 
 def stream_gpu_api_response(

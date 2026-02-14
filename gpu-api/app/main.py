@@ -1,3 +1,4 @@
+import logging
 from asyncio import gather, to_thread
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -14,8 +15,11 @@ from app.api.rerank import router as rerank_router
 from app.api.streams import router as streams_router
 from app.llms.bge_m3 import init_bge_m3_embedder
 from app.llms.reranker import init_reranker
+from app.utils.exceptions import ModelNotReadyError
 from app.utils.logger import setup_logging
 from app.utils.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 settings = Settings()
 
@@ -85,11 +89,23 @@ def make_app(settings: Settings) -> FastAPI:
             content=jsonable_encoder(content),
         )
 
+    @app.exception_handler(ModelNotReadyError)
+    async def model_not_ready_exception_handler(
+        request: Request,
+        exc: ModelNotReadyError,
+    ) -> JSONResponse:
+        logger.exception("Model not ready")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "The model is not ready. Please try again later."},
+        )
+
     @app.exception_handler(Exception)
     async def generic_exception_handler(
         request: Request,
         exc: Exception,
     ) -> JSONResponse:
+        logger.exception("Unhandled exception")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "An unexpected internal server error occurred."},

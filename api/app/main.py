@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -12,8 +13,11 @@ from app.api.health import router as health_router
 from app.api.links import router as links_router
 from app.api.questions import router as questions_router
 from app.data.connection import Database
+from app.llms.context import RetrievalError
 from app.utils.logger import setup_logging
 from app.utils.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 settings = Settings()
 
@@ -89,11 +93,23 @@ def make_app(settings: Settings) -> FastAPI:
             content=jsonable_encoder(content),
         )
 
+    @app.exception_handler(RetrievalError)
+    async def retrieval_exception_handler(
+        request: Request,
+        exc: RetrievalError,
+    ) -> JSONResponse:
+        logger.exception("Context retrieval failed")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "Failed to retrieve or re-rank context for the query."},
+        )
+
     @app.exception_handler(Exception)
     async def generic_exception_handler(
         request: Request,
         exc: Exception,
     ) -> JSONResponse:
+        logger.exception("Unhandled exception")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "An unexpected internal server error occurred."},
