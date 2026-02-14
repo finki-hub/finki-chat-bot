@@ -151,5 +151,15 @@ async def stream_response_with_agent(
                 max_tokens=max_tokens,
             )
 
+        case Model.QWEN2_1_5_B_INSTRUCT:
+            return stream_gpu_api_response(
+                user_prompt,
+                model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+            )
+
         case _:
             raise ValueError(f"Unsupported model: {model}")
