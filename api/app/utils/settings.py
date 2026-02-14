@@ -6,10 +6,8 @@ class Settings(BaseSettings):
     Application settings.
     """
 
-    APP_TITLE: str = "FINKI Chat Bot API"
-    APP_DESCRIPTION: str = (
-        "API for FINKI Chat Bot, managing questions, links, and LLM interactions."
-    )
+    APP_TITLE: str = "API"
+    APP_DESCRIPTION: str = "API managing questions, links, and LLM interactions."
     API_VERSION: str = "1.0.0"
 
     LOG_LEVEL: str = "INFO"

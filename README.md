@@ -1,6 +1,6 @@
-# FINKI Chat Bot
+# FINKI Hub / Chat Bot
 
-RAG chat bot for the [`FCSE Students`](https://discord.gg/finki-studenti-810997107376914444) Discord server, powered by [LangChain](https://github.com/langchain-ai/langchain) and [FastAPI](https://github.com/fastapi/fastapi). Uses [PostgreSQL](https://github.com/postgres/postgres) and [pgvector](https://github.com/pgvector/pgvector) for keeping documents. Has support for many LLMs.
+RAG chat bot for the [`FINKI Hub`](https://discord.gg/finki-studenti-810997107376914444) Discord server, powered by [LangChain](https://github.com/langchain-ai/langchain) and [FastAPI](https://github.com/fastapi/fastapi). Uses [PostgreSQL](https://github.com/postgres/postgres) and [pgvector](https://github.com/pgvector/pgvector) for keeping documents. Has support for many LLMs.
 
 It currently works on a dataset of documents (FAQ). It is planned to support other types of data as well.
 
@@ -13,7 +13,7 @@ This project comes as a monorepo of microservices:
 - Front-end (WIP)
 - Database (PostgreSQL + pgvector) for keeping documents and embeddings
 
-The API service is packaged into a Docker image ([`ghcr.io/finki-hub/finki-chat-bot`](https://github.com/finki-hub/finki-chat-bot/pkgs/container/finki-chat-bot)), while the GPU API service is not automatically Dockerized because it contains PyTorch. However, it comes with a `Dockerfile` so it can be built locally if necessary.
+The API service is packaged into a Docker image ([`ghcr.io/finki-hub/chat-bot`](https://github.com/finki-hub/chat-bot/pkgs/container/chat-bot)), while the GPU API service is not automatically Dockerized because it contains PyTorch. However, it comes with a `Dockerfile` so it can be built locally if necessary.
 
 ## Quick Setup (Production)
 
@@ -31,7 +31,7 @@ The API will be running on port `8880`. This also brings up a `pgAdmin` instance
 
 Requires Python >= 3.13 and [`uv`](https://github.com/astral-sh/uv).
 
-1. Clone the repository: `git clone https://github.com/finki-hub/finki-chat-bot.git`
+1. Clone the repository: `git clone https://github.com/finki-hub/chat-bot.git`
 2. Install dependencies: in each directory (`api` and `gpu-api`), run `uv sync`
 3. Prepare env. variables by copying `env.sample` to `.env` - minimum setup requires the database configuration, it can be left as is
 4. Run it: `docker compose up -d`

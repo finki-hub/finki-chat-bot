@@ -1,4 +1,4 @@
-name: finki-chat-bot-dev
+name: finki-hub-chat-bot-dev
 
 services:
   api:

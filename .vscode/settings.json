@@ -1,6 +1,6 @@
 {
   "sonarlint.connectedMode.project": {
     "connectionId": "finki-hub",
-    "projectKey": "finki-chat-bot"
+    "projectKey": "finki-hub-chat-bot"
   }
 }

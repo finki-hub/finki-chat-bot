@@ -14,5 +14,5 @@ jobs:
     with:
       dockerfile: ./api/Dockerfile
       context: ./api
-      package-name: finki-chat-bot-api
+      package-name: chat-bot-api
     secrets: inherit

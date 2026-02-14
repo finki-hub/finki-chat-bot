@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     Application settings.
     """
 
-    APP_TITLE: str = "FINKI Chat Bot GPU API"
-    APP_DESCRIPTION: str = "API for FINKI Chat Bot, providing GPU-accelerated embeddings and chat capabilities."
+    APP_TITLE: str = "GPU API"
+    APP_DESCRIPTION: str = "API providing GPU-accelerated embeddings and chat capabilities."
     API_VERSION: str = "1.0.0"
 
     LOG_LEVEL: str = "INFO"
