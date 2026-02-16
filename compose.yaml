@@ -27,7 +27,7 @@ services:
     networks:
       - finki_stack_dev
     ports:
-      - '8880:8880'
+      - "8880:8880"
     pull_policy: never
     restart: unless-stopped
 
@@ -47,7 +47,7 @@ services:
     networks:
       - finki_stack_dev
     ports:
-      - ${POSTGRES_PORT}:5432
+      - "${POSTGRES_PORT}:5432"
     restart: unless-stopped
     volumes:
       - ./pgdata:/var/lib/postgresql/data
@@ -62,7 +62,7 @@ services:
     networks:
       - finki_stack_dev
     ports:
-      - '8888:8888'
+      - "8888:8888"
     pull_policy: never
     restart: unless-stopped
     volumes:
@@ -76,7 +76,7 @@ services:
     networks:
       - finki_stack_dev
     ports:
-      - '5550:80'
+      - "5550:80"
     restart: unless-stopped
     volumes:
       - ./pgadmin:/var/lib/pgadmin
