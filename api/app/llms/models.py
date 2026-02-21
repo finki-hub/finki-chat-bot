@@ -21,8 +21,8 @@ class Model(Enum):
     TEXT_EMBEDDING_3_LARGE = "text-embedding-3-large"
 
     GEMINI_2_5_FLASH_PREVIEW_05_20 = "gemini-2.5-flash-preview-05-20"
-    TEXT_EMBEDDING_005 = "models/text-embedding-005"
-    GEMINI_EMBEDDING_001 = "models/gemini-embedding-001"
+    TEXT_EMBEDDING_005 = "text-embedding-005"
+    GEMINI_EMBEDDING_001 = "gemini-embedding-001"
 
     DOMESTIC_YAK_8B_INSTRUCT_GGUF = "hf.co/LVSTCK/domestic-yak-8B-instruct-GGUF:Q8_0"
     VEZILKALLM_GGUF = "hf.co/mradermacher/VezilkaLLM-GGUF:Q8_0"
