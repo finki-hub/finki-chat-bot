@@ -52,11 +52,7 @@ ALTER TABLE question
 DROP COLUMN IF EXISTS embedding_text_embedding_004;
 
 ALTER TABLE question
-ADD COLUMN IF NOT EXISTS embedding_text_embedding_005 vector (768);
-
-CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_005_idx ON question USING hnsw (
-    embedding_text_embedding_005 vector_cosine_ops
-);
+DROP COLUMN IF EXISTS embedding_text_embedding_005;
 
 ALTER TABLE question
 ADD COLUMN IF NOT EXISTS embedding_gemini_embedding_001 vector (3072);

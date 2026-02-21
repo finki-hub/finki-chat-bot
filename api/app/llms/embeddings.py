@@ -49,7 +49,7 @@ async def generate_embeddings(
         case Model.TEXT_EMBEDDING_3_LARGE:
             return await generate_openai_embeddings(text, model)
 
-        case Model.TEXT_EMBEDDING_005 | Model.GEMINI_EMBEDDING_001:
+        case Model.GEMINI_EMBEDDING_001:
             return await generate_google_embeddings(text, model)
 
         case Model.MULTILINGUAL_E5_LARGE | Model.BGE_M3_LOCAL:
