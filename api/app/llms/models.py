@@ -51,7 +51,6 @@ GPU_API_MODELS: dict[Model, str] = {
     Model.QWEN2_5_7B_INSTRUCT: "Qwen/Qwen2.5-7B-Instruct",
 }
 
-
 HALFVEC_EMBEDDING_MODELS: frozenset[Model] = frozenset(
     {
         Model.TEXT_EMBEDDING_3_LARGE,
