@@ -164,25 +164,6 @@ async def _create_agent_token_generator(
         yield "data: An error occurred while processing your request. Please try again.\n\n"
 
 
-def _fallback_to_regular_response(
-    user_prompt: str,
-    model: Model,
-    system_prompt: str,
-    temperature: float,
-    top_p: float,
-    max_tokens: int,
-) -> StreamingResponse:
-    """Helper function to return fallback response."""
-    return stream_ollama_response(
-        user_prompt,
-        model,
-        system_prompt=system_prompt,
-        temperature=temperature,
-        top_p=top_p,
-        max_tokens=max_tokens,
-    )
-
-
 async def stream_ollama_agent_response(
     user_prompt: str,
     model: Model,
@@ -213,21 +194,7 @@ async def stream_ollama_agent_response(
             ", ".join(tool.name for tool in tools) if tools else "None",
         )
 
-        if not tools:
-            logger.warning(
-                "No tools available for the agent. Falling back to regular response",
-            )
-
-            return _fallback_to_regular_response(
-                user_prompt,
-                model,
-                system_prompt,
-                temperature,
-                top_p,
-                max_tokens,
-            )
-
-        agent: CompiledStateGraph = create_agent(llm, tools)
+        agent = create_agent(llm, tools)
 
         messages = [
             {"role": "system", "content": system_prompt},
@@ -244,11 +211,11 @@ async def stream_ollama_agent_response(
             "Failed to stream Ollama agent response. Falling back to regular response",
         )
 
-        return _fallback_to_regular_response(
+        return stream_ollama_response(
             user_prompt,
             model,
-            system_prompt,
-            temperature,
-            top_p,
-            max_tokens,
+            system_prompt=system_prompt,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
         )
