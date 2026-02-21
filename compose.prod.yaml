@@ -21,7 +21,7 @@ services:
       MCP_SSE_URLS: ${MCP_SSE_URLS}
       OLLAMA_URL: ${OLLAMA_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-    image: ghcr.io/finki-hub/chat-bot:latest
+    image: ghcr.io/finki-hub/chat-bot-api:latest
     networks:
       - finki_stack
     ports:
