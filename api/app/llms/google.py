@@ -33,7 +33,7 @@ def get_google_embedder(model: Model) -> GoogleGenerativeAIEmbeddings:
     if key not in google_embedders:
         google_embedders[key] = GoogleGenerativeAIEmbeddings(
             model=model.value,
-            google_api_key=SecretStr(settings.GOOGLE_API_KEY),
+            api_key=SecretStr(settings.GOOGLE_API_KEY),
         )
 
     return google_embedders[key]
