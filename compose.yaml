@@ -17,7 +17,6 @@ services:
     environment:
       API_KEY: ${API_KEY}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
-      TZ: ${TZ}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GPU_API_URL: ${GPU_API_URL}
       LOG_LEVEL: ${LOG_LEVEL}
@@ -25,6 +24,7 @@ services:
       MCP_SSE_URLS: ${MCP_SSE_URLS}
       OLLAMA_URL: ${OLLAMA_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      TZ: ${TZ}
       WORKERS: ${WORKERS}
     image: finki-hub/chat-bot-api:latest
     networks:
@@ -52,7 +52,7 @@ services:
     networks:
       - finki_stack_dev
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - ${POSTGRES_PORT}:5432
     restart: unless-stopped
     volumes:
       - ./pgdata:/var/lib/postgresql/data
@@ -65,8 +65,8 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       PRELOAD_BGEM3: ${PRELOAD_BGEM3}
       TZ: ${TZ}
-    image: finki-hub/chat-bot-gpu-api:latest
     gpus: all
+    image: finki-hub/chat-bot-gpu-api:latest
     networks:
       - finki_stack_dev
     ports:
