@@ -1,15 +1,15 @@
 import asyncio
 import logging
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import Generator
 from typing import overload
 
 from fastapi.responses import StreamingResponse
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessageChunk, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langgraph.graph.state import CompiledStateGraph
 from pydantic import SecretStr
 
+from app.llms.agents import create_agent_token_generator, stream_sync_gen_as_sse
 from app.llms.mcp import build_mcp_client
 from app.llms.models import Model
 from app.utils.settings import Settings
@@ -138,50 +138,7 @@ def stream_google_response(
                 text = str(content)
             yield text
 
-    async def async_token_gen() -> AsyncGenerator[str]:
-        it = sync_token_gen()
-        while True:
-            chunk = await asyncio.to_thread(next, it, None)
-            if chunk is None:
-                break
-            preserved_chunk = chunk.replace("\n", "\\n")
-            yield f"data: {preserved_chunk}\n\n"
-
-    return StreamingResponse(
-        async_token_gen(),
-        media_type="text/event-stream",
-    )
-
-
-async def _create_agent_token_generator(
-    agent: CompiledStateGraph,
-    messages: list[dict[str, str]],
-) -> AsyncGenerator[str]:
-    """Helper function to generate tokens from agent stream."""
-    try:
-        async for message, _metadata in agent.astream(
-            {"messages": messages},
-            {"configurable": {"thread_id": "default"}},
-            stream_mode="messages",
-        ):
-            if not isinstance(message, AIMessageChunk):
-                continue
-            raw = message.content
-            if isinstance(raw, list):
-                text = "".join(
-                    part.get("text", "") if isinstance(part, dict) else str(part)
-                    for part in raw
-                )
-            else:
-                text = str(raw)
-            if not text:
-                continue
-            preserved = text.replace("\n", "\\n")
-            yield f"data: {preserved}\n\n"
-
-    except Exception:
-        logger.exception("Agent error occurred during streaming")
-        yield "data: An error occurred while processing your request. Please try again.\n\n"
+    return stream_sync_gen_as_sse(sync_token_gen())
 
 
 async def stream_google_agent_response(
@@ -222,7 +179,7 @@ async def stream_google_agent_response(
         ]
 
         return StreamingResponse(
-            _create_agent_token_generator(agent, messages),
+            create_agent_token_generator(agent, messages),
             media_type="text/event-stream",
         )
 
