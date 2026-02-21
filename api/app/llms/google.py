@@ -5,7 +5,7 @@ from typing import overload
 
 from fastapi.responses import StreamingResponse
 from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessageChunk, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langgraph.graph.state import CompiledStateGraph
 from pydantic import SecretStr
@@ -159,26 +159,25 @@ async def _create_agent_token_generator(
 ) -> AsyncGenerator[str]:
     """Helper function to generate tokens from agent stream."""
     try:
-        async for chunk in agent.astream(
+        async for message, _metadata in agent.astream(
             {"messages": messages},
             {"configurable": {"thread_id": "default"}},
+            stream_mode="messages",
         ):
-            if "agent" in chunk:
-                agent_messages = chunk["agent"]["messages"]
-                for message in agent_messages:
-                    if hasattr(message, "content") and message.content:
-                        raw = message.content
-                        if isinstance(raw, list):
-                            content = "".join(
-                                part.get("text", "")
-                                if isinstance(part, dict)
-                                else str(part)
-                                for part in raw
-                            )
-                        else:
-                            content = str(raw)
-                        preserved_content = content.replace("\n", "\\n")
-                        yield f"data: {preserved_content}\n\n"
+            if not isinstance(message, AIMessageChunk):
+                continue
+            raw = message.content
+            if isinstance(raw, list):
+                text = "".join(
+                    part.get("text", "") if isinstance(part, dict) else str(part)
+                    for part in raw
+                )
+            else:
+                text = str(raw)
+            if not text:
+                continue
+            preserved = text.replace("\n", "\\n")
+            yield f"data: {preserved}\n\n"
 
     except Exception:
         logger.exception("Agent error occurred during streaming")
