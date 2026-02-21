@@ -16,13 +16,15 @@ services:
         condition: service_healthy
     environment:
       API_KEY: ${API_KEY}
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GPU_API_URL: ${GPU_API_URL}
+      LOG_LEVEL: ${LOG_LEVEL}
       MCP_HTTP_URLS: ${MCP_HTTP_URLS}
       MCP_SSE_URLS: ${MCP_SSE_URLS}
       OLLAMA_URL: ${OLLAMA_URL}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      WORKERS: ${WORKERS}
     image: finki-hub/chat-bot-api:latest
     networks:
       - finki_stack_dev
@@ -35,6 +37,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
     healthcheck:
       interval: 10s
@@ -57,6 +60,8 @@ services:
       context: ./gpu-api
     environment:
       HF_HOME: /huggingface_cache
+      LOG_LEVEL: ${LOG_LEVEL}
+      PRELOAD_BGEM3: ${PRELOAD_BGEM3}
     image: finki-hub/chat-bot-gpu-api:latest
     gpus: all
     networks:
