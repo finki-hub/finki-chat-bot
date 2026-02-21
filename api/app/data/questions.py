@@ -3,7 +3,7 @@
 import json
 
 from app.data.connection import Database
-from app.llms.models import MODEL_EMBEDDINGS_COLUMNS, Model
+from app.llms.models import HALFVEC_EMBEDDING_MODELS, MODEL_EMBEDDINGS_COLUMNS, Model
 from app.schemas.questions import (
     CreateQuestionSchema,
     QuestionSchema,
@@ -176,10 +176,19 @@ async def get_closest_questions(
     threshold: float = 0.5,
 ) -> list[QuestionSchema]:
     embedding_column = MODEL_EMBEDDINGS_COLUMNS[model]
+
+    if model in HALFVEC_EMBEDDING_MODELS:
+        dims = len(embedded_query)
+        col_expr = f"{embedding_column}::halfvec({dims})"
+        param_expr = f"$1::halfvec({dims})"
+    else:
+        col_expr = embedding_column
+        param_expr = "$1"
+
     sql = f"""
-    SELECT *, {embedding_column} <=> $1 AS distance
+    SELECT *, {col_expr} <=> {param_expr} AS distance
     FROM question
-    WHERE {embedding_column} IS NOT NULL AND {embedding_column} <=> $1 < $3
+    WHERE {embedding_column} IS NOT NULL AND {col_expr} <=> {param_expr} < $3
     ORDER BY distance
     LIMIT $2
     """  # noqa: S608

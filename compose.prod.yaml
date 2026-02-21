@@ -1,61 +1,77 @@
 name: finki-hub-chat-bot
 
+networks:
+  finki_stack:
+    driver: bridge
+    name: finki_stack
+    # Set external to true to use an existing network
+    # external: true
+
 services:
   api:
-    image: ghcr.io/finki-hub/chat-bot:latest
-    ports:
-      - '8880:8880'
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       API_KEY: ${API_KEY}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      OLLAMA_URL: ${OLLAMA_URL}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GPU_API_URL: ${GPU_API_URL}
       MCP_HTTP_URLS: ${MCP_HTTP_URLS}
       MCP_SSE_URLS: ${MCP_SSE_URLS}
-    depends_on:
-      db:
-        condition: service_healthy
+      OLLAMA_URL: ${OLLAMA_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    image: ghcr.io/finki-hub/chat-bot:latest
     networks:
       - finki_stack
+    ports:
+      - "8880:8880"
     restart: unless-stopped
 
   db:
-    image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_PORT: ${POSTGRES_PORT}
-    ports:
-      - '${POSTGRES_PORT}:5432'
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER}
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER']
       interval: 10s
-      timeout: 5s
       retries: 5
+      test:
+        - CMD-SHELL
+        - pg_isready -U $$POSTGRES_USER
+      timeout: 5s
+    image: pgvector/pgvector:pg17
     networks:
       - finki_stack
+    ports:
+      - "${POSTGRES_PORT}:5432"
     restart: unless-stopped
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  gpu-api:
+    environment:
+      HF_HOME: /huggingface_cache
+    image: ghcr.io/finki-hub/chat-bot-gpu-api:latest
+    gpus: all
+    networks:
+      - finki_stack
+    ports:
+      - "8888:8888"
+    restart: unless-stopped
+    volumes:
+      - ./hf_cache:/huggingface_cache
 
   pgadmin:
-    image: dpage/pgadmin4:latest
-    ports:
-      - '5555:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    image: dpage/pgadmin4:latest
     networks:
       - finki_stack
-    user: '0:0'
+    ports:
+      - "5555:80"
     restart: unless-stopped
-
-networks:
-  finki_stack:
-    name: finki_stack
-    driver: bridge
-    # Set external to true to use an existing network
-    # external: true
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin

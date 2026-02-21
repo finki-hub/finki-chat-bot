@@ -43,13 +43,27 @@ CREATE INDEX IF NOT EXISTS question_embedding_bge_m3_idx ON question USING hnsw 
 ALTER TABLE question
 ADD COLUMN IF NOT EXISTS embedding_text_embedding_3_large vector (3072);
 
--- No indexing for text_embedding_3_large because indexes support up to 2000 dimensions
+-- vector HNSW supports up to 2000 dims, but halfvec supports up to 4000 dims
+CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_3_large_idx ON question USING hnsw (
+    (embedding_text_embedding_3_large::halfvec(3072)) halfvec_cosine_ops
+);
 
 ALTER TABLE question
-ADD COLUMN IF NOT EXISTS embedding_text_embedding_004 vector (768);
+DROP COLUMN IF EXISTS embedding_text_embedding_004;
 
-CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_004_idx ON question USING hnsw (
-    embedding_text_embedding_004 vector_cosine_ops
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_text_embedding_005 vector (768);
+
+CREATE INDEX IF NOT EXISTS question_embedding_text_embedding_005_idx ON question USING hnsw (
+    embedding_text_embedding_005 vector_cosine_ops
+);
+
+ALTER TABLE question
+ADD COLUMN IF NOT EXISTS embedding_gemini_embedding_001 vector (3072);
+
+-- vector HNSW supports up to 2000 dims, but halfvec supports up to 4000 dims
+CREATE INDEX IF NOT EXISTS question_embedding_gemini_embedding_001_idx ON question USING hnsw (
+    (embedding_gemini_embedding_001::halfvec(3072)) halfvec_cosine_ops
 );
 
 ALTER TABLE question

@@ -1,84 +1,82 @@
 name: finki-hub-chat-bot-dev
 
+networks:
+  finki_stack_dev:
+    driver: bridge
+    name: finki_stack_dev
+    # Set external to true to use an existing network
+    # external: true
+
 services:
   api:
     build:
       context: ./api
-      dockerfile: Dockerfile
-    ports:
-      - '8880:8880'
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       API_KEY: ${API_KEY}
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      OLLAMA_URL: ${OLLAMA_URL}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GPU_API_URL: ${GPU_API_URL}
       MCP_HTTP_URLS: ${MCP_HTTP_URLS}
       MCP_SSE_URLS: ${MCP_SSE_URLS}
-    depends_on:
-      db:
-        condition: service_healthy
+      OLLAMA_URL: ${OLLAMA_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    image: finki-hub/chat-bot-api:latest
     networks:
       - finki_stack_dev
+    ports:
+      - "8880:8880"
+    pull_policy: never
     restart: unless-stopped
+
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test:
+        - CMD-SHELL
+        - pg_isready -U $$POSTGRES_USER
+      timeout: 5s
+    image: pgvector/pgvector:pg17
+    networks:
+      - finki_stack_dev
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    restart: unless-stopped
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
 
   gpu-api:
     build:
       context: ./gpu-api
-      dockerfile: Dockerfile
-    ports:
-      - '8888:8888'
-    networks:
-      - finki_stack_dev
-    restart: unless-stopped
-    gpus: all
-    volumes:
-      - ./hf_cache:/huggingface_cache
     environment:
       HF_HOME: /huggingface_cache
-
-  db:
-    image: pgvector/pgvector:pg17
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - '${POSTGRES_PORT}:5432'
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    image: finki-hub/chat-bot-gpu-api:latest
+    gpus: all
     networks:
       - finki_stack_dev
+    ports:
+      - "8888:8888"
+    pull_policy: never
     restart: unless-stopped
+    volumes:
+      - ./hf_cache:/huggingface_cache
 
   pgadmin:
-    image: dpage/pgadmin4:latest
-    ports:
-      - '5550:80'
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    image: dpage/pgadmin4:latest
     networks:
       - finki_stack_dev
+    ports:
+      - "5550:80"
+    restart: unless-stopped
     volumes:
       - ./pgadmin:/var/lib/pgadmin
-    user: '0:0'
-    restart: unless-stopped
-
-networks:
-  finki_stack_dev:
-    name: finki_stack_dev
-    driver: bridge
-    # Set external to true to use an existing network
-    # external: true
-
-volumes:
-  mongo-data:
-  pgdata:
-  pgadmin:
