@@ -49,6 +49,7 @@ def stream_response(
 
         case (
             Model.GPT_4O_MINI
+            | Model.GPT_4_1
             | Model.GPT_4_1_MINI
             | Model.GPT_4_1_NANO
             | Model.GPT_5_2
@@ -64,7 +65,11 @@ def stream_response(
                 max_tokens=max_tokens,
             )
 
-        case Model.GEMINI_2_5_FLASH_PREVIEW_05_20:
+        case (
+            Model.GEMINI_2_5_FLASH
+            | Model.GEMINI_2_5_PRO
+            | Model.GEMINI_3_FLASH_PREVIEW
+        ):
             return stream_google_response(
                 user_prompt,
                 model,
@@ -74,7 +79,7 @@ def stream_response(
                 max_tokens=max_tokens,
             )
 
-        case Model.QWEN2_1_5_B_INSTRUCT:
+        case Model.QWEN2_1_5_B_INSTRUCT | Model.QWEN2_5_7B_INSTRUCT:
             return stream_gpu_api_response(
                 user_prompt,
                 model,
@@ -126,6 +131,7 @@ async def stream_response_with_agent(
 
         case (
             Model.GPT_4O_MINI
+            | Model.GPT_4_1
             | Model.GPT_4_1_MINI
             | Model.GPT_4_1_NANO
             | Model.GPT_5_2
@@ -141,7 +147,11 @@ async def stream_response_with_agent(
                 max_tokens=max_tokens,
             )
 
-        case Model.GEMINI_2_5_FLASH_PREVIEW_05_20:
+        case (
+            Model.GEMINI_2_5_FLASH
+            | Model.GEMINI_2_5_PRO
+            | Model.GEMINI_3_FLASH_PREVIEW
+        ):
             return await stream_google_agent_response(
                 user_prompt,
                 model,
@@ -151,7 +161,7 @@ async def stream_response_with_agent(
                 max_tokens=max_tokens,
             )
 
-        case Model.QWEN2_1_5_B_INSTRUCT:
+        case Model.QWEN2_1_5_B_INSTRUCT | Model.QWEN2_5_7B_INSTRUCT:
             return stream_gpu_api_response(
                 user_prompt,
                 model,

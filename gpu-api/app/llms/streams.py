@@ -6,11 +6,13 @@ from fastapi.responses import StreamingResponse
 
 from app.llms.models import Model
 from app.llms.qwen2_1_5_b_instruct import stream_qwen2_response
+from app.llms.qwen2_5_7b_instruct import stream_qwen2_5_7b_response
 
 logger = logging.getLogger(__name__)
 
 streamers = {
     Model.QWEN2_1_5_B_INSTRUCT: stream_qwen2_response,
+    Model.QWEN2_5_7B_INSTRUCT: stream_qwen2_5_7b_response,
 }
 
 
