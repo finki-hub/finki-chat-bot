@@ -128,7 +128,15 @@ def stream_google_response(
 
     def sync_token_gen() -> Generator[str]:
         for chunk in llm.stream(prompt_messages):
-            yield str(chunk.content)
+            content = chunk.content
+            if isinstance(content, list):
+                text = "".join(
+                    part.get("text", "") if isinstance(part, dict) else str(part)
+                    for part in content
+                )
+            else:
+                text = str(content)
+            yield text
 
     async def async_token_gen() -> AsyncGenerator[str]:
         it = sync_token_gen()
@@ -159,7 +167,16 @@ async def _create_agent_token_generator(
                 agent_messages = chunk["agent"]["messages"]
                 for message in agent_messages:
                     if hasattr(message, "content") and message.content:
-                        content = str(message.content)
+                        raw = message.content
+                        if isinstance(raw, list):
+                            content = "".join(
+                                part.get("text", "")
+                                if isinstance(part, dict)
+                                else str(part)
+                                for part in raw
+                            )
+                        else:
+                            content = str(raw)
                         preserved_content = content.replace("\n", "\\n")
                         yield f"data: {preserved_content}\n\n"
 
