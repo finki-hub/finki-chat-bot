@@ -13,7 +13,7 @@ This project comes as a monorepo of microservices:
 - Front-end (WIP)
 - Database (PostgreSQL + pgvector) for keeping documents and embeddings
 
-The API service is packaged into a Docker image ([`ghcr.io/finki-hub/chat-bot`](https://github.com/finki-hub/chat-bot/pkgs/container/chat-bot)), while the GPU API service is not automatically Dockerized because it contains PyTorch. However, it comes with a `Dockerfile` so it can be built locally if necessary.
+The API Docker image is available as [`ghcr.io/finki-hub/chat-bot-api`](https://github.com/finki-hub/chat-bot/pkgs/container/chat-bot-api), while the GPU API Docker image is available as [`ghcr.io/finki-hub/chat-bot-gpu-api`](https://github.com/finki-hub/chat-bot/pkgs/container/chat-bot-gpu-api).
 
 ## Quick Setup (Production)
 
